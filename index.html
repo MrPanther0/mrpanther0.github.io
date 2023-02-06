@@ -1,0 +1,1027 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>CGA Practical’s</title><style>
+    /* cspell:disable-file */
+    /* webkit printing magic: print all background colors */
+    html {
+        -webkit-print-color-adjust: exact;
+    }
+    * {
+        box-sizing: border-box;
+        -webkit-print-color-adjust: exact;
+    }
+    
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    @media only screen {
+        body {
+            margin: 2em auto;
+            max-width: 900px;
+            color: rgb(55, 53, 47);
+        }
+    }
+    
+    body {
+        line-height: 1.5;
+        white-space: pre-wrap;
+    }
+    
+    a,
+    a.visited {
+        color: inherit;
+        text-decoration: underline;
+    }
+    
+    .pdf-relative-link-path {
+        font-size: 80%;
+        color: #444;
+    }
+    
+    h1,
+    h2,
+    h3 {
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-top: 0;
+        margin-bottom: 0.75em;
+    }
+    
+    h1 {
+        font-size: 1.875rem;
+        margin-top: 1.875rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    h3 {
+        font-size: 1.25rem;
+        margin-top: 1.25rem;
+    }
+    
+    .source {
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        padding: 1.5em;
+        word-break: break-all;
+    }
+    
+    .callout {
+        border-radius: 3px;
+        padding: 1rem;
+    }
+    
+    figure {
+        margin: 1.25em 0;
+        page-break-inside: avoid;
+    }
+    
+    figcaption {
+        opacity: 0.5;
+        font-size: 85%;
+        margin-top: 0.5em;
+    }
+    
+    mark {
+        background-color: transparent;
+    }
+    
+    .indented {
+        padding-left: 1.5em;
+    }
+    
+    hr {
+        background: transparent;
+        display: block;
+        width: 100%;
+        height: 1px;
+        visibility: visible;
+        border: none;
+        border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+    }
+    
+    img {
+        max-width: 100%;
+    }
+    
+    @media only print {
+        img {
+            max-height: 100vh;
+            object-fit: contain;
+        }
+    }
+    
+    @page {
+        margin: 1in;
+    }
+    
+    .collection-content {
+        font-size: 0.875rem;
+    }
+    
+    .column-list {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .column {
+        padding: 0 1em;
+    }
+    
+    .column:first-child {
+        padding-left: 0;
+    }
+    
+    .column:last-child {
+        padding-right: 0;
+    }
+    
+    .table_of_contents-item {
+        display: block;
+        font-size: 0.875rem;
+        line-height: 1.3;
+        padding: 0.125rem;
+    }
+    
+    .table_of_contents-indent-1 {
+        margin-left: 1.5rem;
+    }
+    
+    .table_of_contents-indent-2 {
+        margin-left: 3rem;
+    }
+    
+    .table_of_contents-indent-3 {
+        margin-left: 4.5rem;
+    }
+    
+    .table_of_contents-link {
+        text-decoration: none;
+        opacity: 0.7;
+        border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+    }
+    
+    table,
+    th,
+    td {
+        border: 1px solid rgba(55, 53, 47, 0.09);
+        border-collapse: collapse;
+    }
+    
+    table {
+        border-left: none;
+        border-right: none;
+    }
+    
+    th,
+    td {
+        font-weight: normal;
+        padding: 0.25em 0.5em;
+        line-height: 1.5;
+        min-height: 1.5em;
+        text-align: left;
+    }
+    
+    th {
+        color: rgba(55, 53, 47, 0.6);
+    }
+    
+    ol,
+    ul {
+        margin: 0;
+        margin-block-start: 0.6em;
+        margin-block-end: 0.6em;
+    }
+    
+    li > ol:first-child,
+    li > ul:first-child {
+        margin-block-start: 0.6em;
+    }
+    
+    ul > li {
+        list-style: disc;
+    }
+    
+    ul.to-do-list {
+        text-indent: -1.7em;
+    }
+    
+    ul.to-do-list > li {
+        list-style: none;
+    }
+    
+    .to-do-children-checked {
+        text-decoration: line-through;
+        opacity: 0.375;
+    }
+    
+    ul.toggle > li {
+        list-style: none;
+    }
+    
+    ul {
+        padding-inline-start: 1.7em;
+    }
+    
+    ul > li {
+        padding-left: 0.1em;
+    }
+    
+    ol {
+        padding-inline-start: 1.6em;
+    }
+    
+    ol > li {
+        padding-left: 0.2em;
+    }
+    
+    .mono ol {
+        padding-inline-start: 2em;
+    }
+    
+    .mono ol > li {
+        text-indent: -0.4em;
+    }
+    
+    .toggle {
+        padding-inline-start: 0em;
+        list-style-type: none;
+    }
+    
+    /* Indent toggle children */
+    .toggle > li > details {
+        padding-left: 1.7em;
+    }
+    
+    .toggle > li > details > summary {
+        margin-left: -1.1em;
+    }
+    
+    .selected-value {
+        display: inline-block;
+        padding: 0 0.5em;
+        background: rgba(206, 205, 202, 0.5);
+        border-radius: 3px;
+        margin-right: 0.5em;
+        margin-top: 0.3em;
+        margin-bottom: 0.3em;
+        white-space: nowrap;
+    }
+    
+    .collection-title {
+        display: inline-block;
+        margin-right: 1em;
+    }
+    
+    .simple-table {
+        margin-top: 1em;
+        font-size: 0.875rem;
+        empty-cells: show;
+    }
+    .simple-table td {
+        height: 29px;
+        min-width: 120px;
+    }
+    
+    .simple-table th {
+        height: 29px;
+        min-width: 120px;
+    }
+    
+    .simple-table-header-color {
+        background: rgb(247, 246, 243);
+        color: black;
+    }
+    .simple-table-header {
+        font-weight: 500;
+    }
+    
+    time {
+        opacity: 0.5;
+    }
+    
+    .icon {
+        display: inline-block;
+        max-width: 1.2em;
+        max-height: 1.2em;
+        text-decoration: none;
+        vertical-align: text-bottom;
+        margin-right: 0.5em;
+    }
+    
+    img.icon {
+        border-radius: 3px;
+    }
+    
+    .user-icon {
+        width: 1.5em;
+        height: 1.5em;
+        border-radius: 100%;
+        margin-right: 0.5rem;
+    }
+    
+    .user-icon-inner {
+        font-size: 0.8em;
+    }
+    
+    .text-icon {
+        border: 1px solid #000;
+        text-align: center;
+    }
+    
+    .page-cover-image {
+        display: block;
+        object-fit: cover;
+        width: 100%;
+        max-height: 30vh;
+    }
+    
+    .page-header-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .page-header-icon-with-cover {
+        margin-top: -0.72em;
+        margin-left: 0.07em;
+    }
+    
+    .page-header-icon img {
+        border-radius: 3px;
+    }
+    
+    .link-to-page {
+        margin: 1em 0;
+        padding: 0;
+        border: none;
+        font-weight: 500;
+    }
+    
+    p > .user {
+        opacity: 0.5;
+    }
+    
+    td > .user,
+    td > time {
+        white-space: nowrap;
+    }
+    
+    input[type="checkbox"] {
+        transform: scale(1.5);
+        margin-right: 0.6em;
+        vertical-align: middle;
+    }
+    
+    p {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+    
+    .image {
+        border: none;
+        margin: 1.5em 0;
+        padding: 0;
+        border-radius: 0;
+        text-align: center;
+    }
+    
+    .code,
+    code {
+        background: rgba(135, 131, 120, 0.15);
+        border-radius: 3px;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-size: 85%;
+        tab-size: 2;
+    }
+    
+    code {
+        color: #eb5757;
+    }
+    
+    .code {
+        padding: 1.5em 1em;
+    }
+    
+    .code-wrap {
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+    
+    .code > code {
+        background: none;
+        padding: 0;
+        font-size: 100%;
+        color: inherit;
+    }
+    
+    blockquote {
+        font-size: 1.25em;
+        margin: 1em 0;
+        padding-left: 1em;
+        border-left: 3px solid rgb(55, 53, 47);
+    }
+    
+    .bookmark {
+        text-decoration: none;
+        max-height: 8em;
+        padding: 0;
+        display: flex;
+        width: 100%;
+        align-items: stretch;
+    }
+    
+    .bookmark-title {
+        font-size: 0.85em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        height: 1.75em;
+        white-space: nowrap;
+    }
+    
+    .bookmark-text {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .bookmark-info {
+        flex: 4 1 180px;
+        padding: 12px 14px 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .bookmark-image {
+        width: 33%;
+        flex: 1 1 180px;
+        display: block;
+        position: relative;
+        object-fit: cover;
+        border-radius: 1px;
+    }
+    
+    .bookmark-description {
+        color: rgba(55, 53, 47, 0.6);
+        font-size: 0.75em;
+        overflow: hidden;
+        max-height: 4.5em;
+        word-break: break-word;
+    }
+    
+    .bookmark-href {
+        font-size: 0.75em;
+        margin-top: 0.25em;
+    }
+    
+    .sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+    .code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+    .serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+    .mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+    .pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+    .pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+    .pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+    .pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+    .pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+    .pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+    .pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+    .pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+    .pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+    .pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+    .pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+    .pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+    .pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+    .pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+    .pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+    .pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+    .highlight-default {
+        color: rgba(55, 53, 47, 1);
+    }
+    .highlight-gray {
+        color: rgba(120, 119, 116, 1);
+        fill: rgba(120, 119, 116, 1);
+    }
+    .highlight-brown {
+        color: rgba(159, 107, 83, 1);
+        fill: rgba(159, 107, 83, 1);
+    }
+    .highlight-orange {
+        color: rgba(217, 115, 13, 1);
+        fill: rgba(217, 115, 13, 1);
+    }
+    .highlight-yellow {
+        color: rgba(203, 145, 47, 1);
+        fill: rgba(203, 145, 47, 1);
+    }
+    .highlight-teal {
+        color: rgba(68, 131, 97, 1);
+        fill: rgba(68, 131, 97, 1);
+    }
+    .highlight-blue {
+        color: rgba(51, 126, 169, 1);
+        fill: rgba(51, 126, 169, 1);
+    }
+    .highlight-purple {
+        color: rgba(144, 101, 176, 1);
+        fill: rgba(144, 101, 176, 1);
+    }
+    .highlight-pink {
+        color: rgba(193, 76, 138, 1);
+        fill: rgba(193, 76, 138, 1);
+    }
+    .highlight-red {
+        color: rgba(212, 76, 71, 1);
+        fill: rgba(212, 76, 71, 1);
+    }
+    .highlight-gray_background {
+        background: rgba(241, 241, 239, 1);
+    }
+    .highlight-brown_background {
+        background: rgba(244, 238, 238, 1);
+    }
+    .highlight-orange_background {
+        background: rgba(251, 236, 221, 1);
+    }
+    .highlight-yellow_background {
+        background: rgba(251, 243, 219, 1);
+    }
+    .highlight-teal_background {
+        background: rgba(237, 243, 236, 1);
+    }
+    .highlight-blue_background {
+        background: rgba(231, 243, 248, 1);
+    }
+    .highlight-purple_background {
+        background: rgba(244, 240, 247, 0.8);
+    }
+    .highlight-pink_background {
+        background: rgba(249, 238, 243, 0.8);
+    }
+    .highlight-red_background {
+        background: rgba(253, 235, 236, 1);
+    }
+    .block-color-default {
+        color: inherit;
+        fill: inherit;
+    }
+    .block-color-gray {
+        color: rgba(120, 119, 116, 1);
+        fill: rgba(120, 119, 116, 1);
+    }
+    .block-color-brown {
+        color: rgba(159, 107, 83, 1);
+        fill: rgba(159, 107, 83, 1);
+    }
+    .block-color-orange {
+        color: rgba(217, 115, 13, 1);
+        fill: rgba(217, 115, 13, 1);
+    }
+    .block-color-yellow {
+        color: rgba(203, 145, 47, 1);
+        fill: rgba(203, 145, 47, 1);
+    }
+    .block-color-teal {
+        color: rgba(68, 131, 97, 1);
+        fill: rgba(68, 131, 97, 1);
+    }
+    .block-color-blue {
+        color: rgba(51, 126, 169, 1);
+        fill: rgba(51, 126, 169, 1);
+    }
+    .block-color-purple {
+        color: rgba(144, 101, 176, 1);
+        fill: rgba(144, 101, 176, 1);
+    }
+    .block-color-pink {
+        color: rgba(193, 76, 138, 1);
+        fill: rgba(193, 76, 138, 1);
+    }
+    .block-color-red {
+        color: rgba(212, 76, 71, 1);
+        fill: rgba(212, 76, 71, 1);
+    }
+    .block-color-gray_background {
+        background: rgba(241, 241, 239, 1);
+    }
+    .block-color-brown_background {
+        background: rgba(244, 238, 238, 1);
+    }
+    .block-color-orange_background {
+        background: rgba(251, 236, 221, 1);
+    }
+    .block-color-yellow_background {
+        background: rgba(251, 243, 219, 1);
+    }
+    .block-color-teal_background {
+        background: rgba(237, 243, 236, 1);
+    }
+    .block-color-blue_background {
+        background: rgba(231, 243, 248, 1);
+    }
+    .block-color-purple_background {
+        background: rgba(244, 240, 247, 0.8);
+    }
+    .block-color-pink_background {
+        background: rgba(249, 238, 243, 0.8);
+    }
+    .block-color-red_background {
+        background: rgba(253, 235, 236, 1);
+    }
+    .select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+    .select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+    .select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+    .select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+    .select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+    .select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+    .select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+    .select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+    .select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+    .select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+    
+    .checkbox {
+        display: inline-flex;
+        vertical-align: text-bottom;
+        width: 16;
+        height: 16;
+        background-size: 16px;
+        margin-left: 2px;
+        margin-right: 5px;
+    }
+    
+    .checkbox-on {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+    }
+    
+    .checkbox-off {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+    }
+        
+    </style></head><body><article id="b15e7d8a-ab81-4b33-96ea-a5ae5960cad4" class="page sans"><header><h1 class="page-title">CGA Practical’s</h1></header><div class="page-body"><h2 id="67be1b5d-2de0-4b13-984f-f60f92b956a9" class=""><strong>Practical 1 -</strong></h2><ol type="1" id="c336d64f-59f0-4f09-8807-528c0bc02e80" class="numbered-list" start="1"><li>Drawing a line using pre-defined function</li></ol><ol type="1" id="334f4898-d3ef-4238-a5bc-c9ea6014038c" class="numbered-list" start="2"><li>Draw a Square using multiple lines function</li></ol><ol type="1" id="fc3df62c-20f8-4c58-932e-504af7d9c917" class="numbered-list" start="3"><li>Draw Circle, rectangle using pre-defined function</li></ol><ol type="1" id="55e29215-cbec-404b-89a0-6427da927e6e" class="numbered-list" start="4"><li>Draw a Hut</li></ol><pre id="6a3f4323-b141-4e1c-ba73-abe2ef120855" class="code"><code>//Drawing a line using pre-defined function
+    #include&lt;iostream.h&gt;
+    #include&lt;conio.h&gt;
+    #include&lt;graphics.h&gt;
+    
+    void main()
+    {
+        int gd = DETECT, gm;
+        initgraph(&amp;gd, &amp;gm, &quot;c:\\TC\\bgi&quot;);
+        line(100, 100, 200, 200);
+        getch();
+        closegraph();
+    }</code></pre><pre id="b799431c-d2d8-4cf0-883c-5edeca6036cf" class="code"><code>//Draw a Square using multiple lines function
+    #include&lt;iostream.h&gt;
+    #include&lt;conio.h&gt;
+    #include&lt;graphics.h&gt;
+    
+    void main()
+    {
+        int gd = DETECT, gm;
+        initgraph(&amp;gd, &amp;gm, &quot;c:\\TC\\bgi&quot;);
+        line(100, 100, 200, 100);
+        line(200, 100, 200, 200);
+        line(200, 200, 100, 200);
+        line(100, 200, 100, 100);
+        getch();
+        closegraph();
+    }</code></pre><pre id="90226dbe-b82c-42a7-9743-67648c6f237f" class="code"><code>//Draw Circle, rectangle using pre-defined function
+    #include&lt;iostream.h&gt;
+    #include&lt;conio.h&gt;
+    #include&lt;graphics.h&gt;
+    
+    void main()
+    {
+        int gd = DETECT, gm;
+        initgraph(&amp;gd, &amp;gm, &quot;c:\\TC\\bgi&quot;);
+        circle(150, 150, 100);
+        rectangle(100, 100, 200, 200);
+        getch();
+        closegraph();
+    }</code></pre><pre id="144553b8-0f50-48b5-a3a5-349188515e6d" class="code"><code>//Draw a Hut
+    #include&lt;iostream.h&gt;
+    #include&lt;conio.h&gt;
+    #include&lt;graphics.h&gt;
+    
+    void main()
+    {
+        int gd = DETECT, gm;
+        initgraph(&amp;gd, &amp;gm, &quot;c:\\TC\\bgi&quot;);
+        line(200, 300, 300, 300);
+        line(300, 300, 250, 250);
+        line(250, 250, 200, 300);
+        rectangle(150, 300, 350, 400);
+        line(200, 300, 200, 400);
+        line(300, 300, 300, 400);
+        getch();
+        closegraph();
+    }</code></pre><h2 id="fec4463f-3bd6-4793-ae2e-cee54e86882b" class="">Practical 2 -</h2><ol type="1" id="894dcd7f-29cd-48bc-9ac5-c66933ff1872" class="numbered-list" start="1"><li>Draw a co-ordinate axis at the center of the screen</li></ol><pre id="bc630f07-d24b-40a2-91af-e340c7a52ca8" class="code"><code>#include&lt;iostream.h&gt;
+    #include&lt;conio.h&gt;
+    #include&lt;graphics.h&gt;
+    
+    void main()
+    {
+        int gd = DETECT, gm;
+        initgraph(&amp;gd, &amp;gm, &quot;c:\\TC\\bgi&quot;);
+        line(0, getmaxy()/2, getmaxx(), getmaxy()/2);
+        line(getmaxx()/2, 0, getmaxx()/2, getmaxy());
+        getch();
+        closegraph();
+    }</code></pre><ol type="1" id="1cf3aee3-ca2b-41a7-8765-1996f1de3720" class="numbered-list" start="2"><li>Use above co-ordinate axis and draw Circle, Rectangle, Ellipse, arc in each quadrant.</li></ol><pre id="555f3e56-5750-4921-bdb7-cbb54b698de6" class="code"><code>//Draw Circle, Rectangle, Ellipse, arc in each quadrant
+    #include&lt;iostream.h&gt;
+    #include&lt;conio.h&gt;
+    #include&lt;graphics.h&gt;
+    
+    void main()
+    {
+        int gd = DETECT, gm;
+        initgraph(&amp;gd, &amp;gm, &quot;c:\\TC\\bgi&quot;);
+    
+        // Draw the coordinate axis
+        line(0, getmaxy()/2, getmaxx(), getmaxy()/2);
+        line(getmaxx()/2, 0, getmaxx()/2, getmaxy());
+    
+        // Draw a circle in the upper left corner
+        circle(getmaxx()/4, getmaxy()/4, 100);
+    
+        // Draw a rectangle in the upper right corner
+        rectangle(getmaxx() - getmaxx()/4, getmaxy()/4, getmaxx() - getmaxx()/5 + 100, getmaxy()/4 + 100);
+    
+        // Draw an ellipse in the lower right corner
+        ellipse(getmaxx() - getmaxx()/4, getmaxy() - getmaxy()/4, 0, 360, 50, 100);
+    
+        // Draw an arc in the lower left corner
+        arc(getmaxx()/4, getmaxy() - getmaxy()/4, 180, 360, 100);
+    
+        getch();
+        closegraph();
+    }</code></pre><ol type="1" id="41c39474-fe79-4b88-aea6-c5322dae3083" class="numbered-list" start="3"><li>Draw flower-pot using different shapes.</li></ol><pre id="3aa3c97e-9036-4aa0-89eb-dfc5676907d4" class="code"><code>#include&lt;graphics.h&gt;
+    #include&lt;conio.h&gt;
+    int main(){
+    int gd = DETECT;
+    int gm;
+    initgraph(&amp;gd, &amp;gm, &quot;C:\\TC\\BGI&quot;);
+    line(310,172,335,236);
+    line(444,171,421,235);
+    line(335,236,292,379);
+    line(421,235,465,384);
+    ellipse(375,380,0,360,90,7);
+    ellipse(375,172,0,360,68,7);
+    getch();
+    closegraph();
+    return 0;
+    }</code></pre><h2 id="2c6a4b05-f0a4-4af9-9297-16385d27d745" class="">Practical 3 -</h2><ol type="1" id="48644512-e6e4-419a-acff-b74a29966145" class="numbered-list" start="1"><li>Consider the 2 end points of a line as (50,50), (100,100). Draw the line using DDA Line drawing algorithm</li></ol><pre id="7c5a2fbc-53f9-41f4-ab37-fb350bef4f3a" class="code"><code>#include&lt;iostream.h&gt;
+    #include&lt;dos.h&gt;
+    #include&lt;graphics.h&gt;
+    #include&lt;conio.h&gt;
+    #include&lt;math.h&gt;
+    void main(){
+    float x,y,x1,y1,x2,y2,dx,dy,length;
+    int i,gd=DETECT,gm;
+    initgraph(&amp;gd,&amp;gm,&quot;C:\\TC\\BGI&quot;);
+    cout&lt;&lt;&quot;Enter value of x1: \t&quot;;
+    cin&gt;&gt;x1;
+    cout&lt;&lt;&quot;Enter value of y1: \t&quot;;
+    cin&gt;&gt;y1;
+    cout&lt;&lt;&quot;Enter value of x2: \t&quot;;
+    cin&gt;&gt;x2;
+    cout&lt;&lt;&quot;Enter value of y2: \t&quot;;
+    cin&gt;&gt;y2;
+    dx=abs(x2-x1);
+    dy=abs(y2-y1);
+    if(dx&gt;=dy)
+    {
+    length=dx;
+    }
+    else
+    {
+    length=dy;
+    }
+    dx=(x2-x1)/length;
+    dy=(y2-y1)/length;
+    x=x1+0.5;
+    y=y1+0.5;
+    i=1;
+    while(i&lt;=length)
+    {
+    putpixel(x,y,15);
+    x=x+dx;
+    y=y+dy;
+    i=i+1;
+    delay(100);
+    }
+    getch();
+    closegraph();
+    }</code></pre><ol type="1" id="a2a3c22b-3949-4a64-98ac-f72844839953" class="numbered-list" start="2"><li>Consider the 2 end points of a line as (70,50), (120,150). Draw the line using Bresenham’s Line drawing algorithm.</li></ol><pre id="1ae4967d-24ad-4e06-99c8-9e8db012216b" class="code"><code>#include&lt;iostream.h&gt;
+    #include&lt;dos.h&gt;
+    #include&lt;graphics.h&gt;
+    #include&lt;conio.h&gt;
+    #include&lt;math.h&gt;
+    void main(){
+    float x,y,x1,y1,dx,dy,e,x2,y2;
+    int i,gd=DETECT,gm;
+    initgraph(&amp;gd,&amp;gm,&quot;c:\\tc\\bgi&quot;);
+    cout&lt;&lt;&quot;Enter value of x1: \t&quot;;
+    cin&gt;&gt;x1;
+    cout&lt;&lt;&quot;Enter value of y1: \t&quot;;
+    cin&gt;&gt;y1;
+    cout&lt;&lt;&quot;Enter value of x2: \t&quot;;
+    cin&gt;&gt;x2;
+    cout&lt;&lt;&quot;Enter value of y2: \t&quot;;
+    cin&gt;&gt;y2;
+    dx=(x2-x1);
+    dy=(y2-y1);
+    x=x1;
+    y=y1;
+    e=2*dy-dx;
+    i=1;
+    do{
+    putpixel(x,y,15);
+    while(e&gt;=0)
+    {
+    y=y+1;
+    e=e-2*dx;
+    }
+    x=x+1;
+    e=e+2*dy;
+    i=i+1;
+    }while(i&lt;=dx);
+    getch();
+    closegraph();
+    }</code></pre><h2 id="ca7b0fe2-68ef-4742-98ee-2a687298db5a" class="">Practical 4 - </h2><ol type="1" id="0e9dd209-69dc-4dad-8f6a-e7f3a52430af" class="numbered-list" start="1"><li>Consider the 2 end points of a line as (70,50), (120,150). Draw the line using Bresenham’s Line drawing algorithm</li></ol><pre id="df7d6e1f-f5c4-4912-a60e-6392a988caf8" class="code"><code>#include&lt;stdio.h&gt;
+    #include &lt;graphics.h&gt;
+    #include &lt;dos.h&gt;
+    #include &lt;conio.h&gt;
+    void main(){
+    int gd=DETECT,gm;
+    initgraph(&amp;gd, &amp;gm, &quot;C:\\TC\\BGI&quot;);
+    int x0=70, y0 = 50 , x1 = 120, y1 = 150 , dx,dy,p,x,y;
+    dx=x1-x0;
+    dy=y1-y0;
+    y=y0;
+    p = 2 *dy-dx;
+    while(x&lt;x1){
+    if (p&gt;=0)
+    {
+    putpixel(x,y,7);
+    y=y+1;
+    y=y0;
+    p=2*dy-dx;
+    while(x&lt;x1){
+    if (p&gt;=0){
+    putpixel(x,y,7);
+    y=y+1;
+    p=p+2*dy-2*dx;
+    }
+    else{
+    putpixel(x,y,7);
+    p=p+2*dy; }
+    x=x+1;
+    }
+    getch();
+    }
+    }
+    }</code></pre><ol type="1" id="e1bad1b0-0481-465d-9461-ef4395f7b74f" class="numbered-list" start="2"><li>Implement Mid-point circle drawing algorithm with radius 70.</li></ol><pre id="00dcdb9f-ef98-4b07-9a7a-adf8ba371444" class="code"><code>#include&lt;dos.h&gt;
+    #include&lt;iostream.h&gt;
+    #include&lt;graphics.h&gt;
+    #include&lt;conio.h&gt;
+    #include&lt;math.h&gt;
+    void main(){
+    float d;
+    int gd=DETECT,gm,x,y,r;
+    initgraph(&amp;gd,&amp;gm,&quot;C:\\TC\\BGI&quot;);
+    cout&lt;&lt;&quot;Enter the radius of a circle :&quot;;
+    cin&gt;&gt;r;
+    x = 0;
+    y = r;
+    d = (5/4) - r;
+    do{
+    putpixel(200+x,200+y,15);
+    putpixel(200+y,200+x,13);
+    putpixel(200+y,200-x,11);
+    putpixel(200+x,200-y,9);
+    putpixel(200-x,200-y,7);
+    putpixel(200-y,200-x,5);
+    putpixel(200-y,200+x,3);
+    putpixel(200-x,200+y,1);
+    if (d &lt; 0){
+    d = d + 2*x + 3;
+    }
+    else{
+    d = d + 2*(x-y) + 5;
+    y = y - 1;
+    }
+    x = x + 1;
+    delay(10);
+    } while(x &lt; y);
+    getch();
+    closegraph();
+    }</code></pre><h2 id="306ed2a5-4969-4840-8563-70675ca550b1" class="">Practical 5 -</h2><ol type="1" id="b4e90b67-b709-42d2-98a6-3628e47d0a8a" class="numbered-list" start="1"><li>Demonstrate 2D transformation - Translation, Scaling, Rotation (for different objects like point, line rectangle, circle)</li></ol><pre id="42f321ef-715e-4c4e-b11a-4b2e657c072e" class="code"><code>#include&lt;iostream.h&gt;
+    #include&lt;conio.h&gt;
+    #include&lt;graphics.h&gt;
+    #include&lt;math.h&gt;
+    
+    const int PI = 3.14159265;
+    
+    void translate(int &amp;x, int &amp;y, int tx, int ty)
+    {
+        x += tx;
+        y += ty;
+    }
+    
+    void scale(int &amp;x, int &amp;y, float sx, float sy)
+    {
+        x = x * sx;
+        y = y * sy;
+    }
+    
+    void rotate(int &amp;x, int &amp;y, int angle)
+    {
+        int x_temp = x * cos(angle * PI / 180) - y * sin(angle * PI / 180);
+        int y_temp = x * sin(angle * PI / 180) + y * cos(angle * PI / 180);
+    
+        x = x_temp;
+        y = y_temp;
+    }
+    
+    void drawPoint(int x, int y)
+    {
+        putpixel(x, y, WHITE);
+    }
+    
+    void drawLine(int x1, int y1, int x2, int y2)
+    {
+        line(x1, y1, x2, y2);
+    }
+    
+    void drawRectangle(int x1, int y1, int x2, int y2)
+    {
+        rectangle(x1, y1, x2, y2);
+    }
+    
+    void drawCircle(int x, int y, int r)
+    {
+        circle(x, y, r);
+    }
+    
+    void main()
+    {
+        int gd = DETECT, gm;
+        initgraph(&amp;gd, &amp;gm, &quot;c:\\TC\\bgi&quot;);
+    
+        int x1 = 100, y1 = 100;
+        int x2 = 200, y2 = 200;
+        int r = 50;
+    
+        drawPoint(x1, y1);
+        drawLine(x1, y1, x2, y2);
+        drawRectangle(x1, y1, x2, y2);
+        drawCircle(x1, y1, r);
+    
+        getch();
+    
+        translate(x1, y1, 50, 50);
+        translate(x2, y2, 50, 50);
+    
+        cleardevice();
+    
+        drawPoint(x1, y1);
+        drawLine(x1, y1, x2, y2);
+        drawRectangle(x1, y1, x2, y2);
+        drawCircle(x1, y1, r);
+    
+        getch();
+    
+        scale(x1, y1, 2, 2);
+        scale(x2, y2, 2, 2);
+        r *= 2;
+    
+        cleardevice();
+    
+        drawPoint(x1, y1);
+        drawLine(x1, y1, x2, y2);
+        drawRectangle(x1, y1, x2, y2);
+        drawCircle(x1, y1, r);
+    
+        getch();
+    
+        rotate(x1, y1, 45);
+        rotate(x2, y2, 45);
+    
+        cleardevice();
+        drawPoint(x1, y1);
+        drawLine(x1, y1, x2, y2);
+        drawRectangle(x1, y1, x2, y2);
+        drawCircle(x1, y1, r);
+        
+    getch();
+    closegraph();
+    }</code></pre></div></article></body></html>
