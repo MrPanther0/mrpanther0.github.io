@@ -1,0 +1,984 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>CJ Practical’s</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="ef0a7a2c-44d1-44b7-badd-0a46a75b5049" class="page sans"><header><div class="page-header-icon undefined"><img class="icon" src="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Page.png"/></div><h1 class="page-title"><mark class="highlight-yellow">CJ Practical’s</mark></h1></header><div class="page-body"><pre id="192bb440-acac-4a2b-94d4-797a53db0aad" class="code"><code>// Basic Template 
+
+public class hello{
+    public static void main(String[] args){ 
+    }
+}</code></pre><pre id="b6545f85-2438-4ae3-9e26-9dcd278f39c3" class="code"><code>// Hello World
+
+public class hello{
+    public static void main(String[] args){
+        System.out.println(&quot;Hello World&quot;);
+    }
+}</code></pre><h3 id="c01d2a40-f3d1-4de2-8b03-962e27e80ed3" class=""><strong>Practical 1 -</strong></h3><pre id="9e4c6a85-8da7-4e3b-be37-ef89144ade24" class="code"><code>/* 
+Find Value of a Specific Expression -
+1. (101+0)/3
+2. 3.0e-6*10000000.1
+3. 24 &amp; 35
+4. 27&lt;&lt;5
+5. (false &amp;&amp; false) || (true &amp;&amp; true)
+*/
+
+class class_name{
+public static void main(String ars[]){
+	double d = (101+0)/3;
+  System.out.println(&quot;(101+0)/3 = &quot; +d);
+ 
+	double w = 3.0e-6 *10000000.1;
+  System.out.println(&quot;3.0e-6 *10000000.1 = &quot; +w);
+ 
+	int a = 24&amp;35;
+	System.out.println(&quot;24&amp;35 = &quot; +a);
+ 
+	int b = 27&lt;&lt;5;
+	System.out.println(&quot;27&lt;&lt;5 = &quot; +b);
+ 
+	boolean c = (false &amp;&amp; false)|| (true &amp;&amp; true);
+	System.out.println(&quot;(false &amp;&amp; false)|| (true &amp;&amp; true) = &quot; +c);
+	}
+}</code></pre><pre id="6d88e9f0-983b-4a79-92e0-d2adaa001555" class="code"><code>// Take user input for height( inches) and convert into feet and inches. 
+// Display the result in ft and in.
+
+import java.util.Scanner;
+ 
+class class_name{
+public static void main(String[] args){
+	Scanner input=new Scanner(System.in);
+	System.out.println(&quot;eneter the inch size: &quot;);
+
+	int inch=input.nextInt();
+	double foot=inch/12.0;
+	System.out.println(&quot;the eneterd size is: &quot;+foot+&quot; feet&quot;);
+	}
+}</code></pre><h3 id="db99847e-221d-436d-bdd9-f7d9b13197c1" class=""><strong>Practical 2 -</strong></h3><pre id="ac0c9ce8-7ae0-4f49-9f2d-852a0b1d0a06" class="code"><code>// Prompt the user for 2 integers using command line argument and print 
+// sum, difference, product, average, maximum and minimum
+
+class class_name{
+public static void main(String[] args){
+	int a,b;
+	a=Integer.parseInt(args[0]);	
+	b=Integer.parseInt(args[1]);
+
+	System.out.println(&quot;sum=&quot;+(a+b));
+	System.out.println(&quot;difference=&quot;+(a-b));
+	System.out.println(&quot;product=&quot;+(a*b));
+	System.out.println(&quot;average=&quot;+((a+b)/2));	
+	System.out.println(&quot;maximum=&quot;+Math.max(a,b));
+	System.out.println(&quot;minimum=&quot;+Math.min(a,b));
+    }
+}</code></pre><pre id="71344f65-00bc-4f89-bc98-df78525ed1be" class="code"><code>/*
+Get the output as shown below if the user inputs a string ‘D’ -
+A
+B A
+C B A
+D C B A
+*/
+
+import java.util.*;
+
+class class_name{
+public static void main(String[] args){
+    Scanner sc=new Scanner(System.in);
+    System.out.println(&quot;Enter a character: &quot;);
+    char a=sc.next().toUpperCase().charAt(0);
+    int alpha=65;
+    int x=a;
+
+    for(int i=0;i&lt;=x-alpha;i++){
+        for(int j=i;j&gt;=0;j--){
+            System.out.print((char)(alpha+j)+&quot; &quot;);
+        }
+        System.out.println();
+        }
+    }
+}</code></pre><pre id="654c5f9c-0bcc-464d-81eb-9cd910f2cda2" class="code"><code>/*
+Write a program that takes the user to provide a single character from the alphabet. 
+Print Vowel or Consonant, depending on the user input. 
+If the user input is not a letter (between a and z or A and Z), 
+or is a string of length &gt; 1, print an error message.
+*/
+
+import java.util.*;
+
+class class_name{
+public static void main(String[] args){
+    Scanner in = new Scanner(System.in);
+    System.out.print(&quot;Enter an alphabet:&quot;);
+    String input=in.next().toLowerCase();
+    boolean uppercase=input.charAt(0)&gt;=65 &amp;&amp; input.charAt(0)&lt;=90;
+    boolean lowercase=input.charAt(0)&gt;=97 &amp;&amp; input.charAt(0)&lt;=122;
+    boolean vowels=input.equals(&quot;a&quot;)||input.equals(&quot;e&quot;)||input.equals(&quot;i&quot;)||input.equals(&quot;0&quot;)||input.equals(&quot;u&quot;);
+    
+    if(input.length()&gt;1){
+        System.out.println(&quot;Error, Not a single character.&quot;);
+    }
+    else if(!(uppercase||lowercase)){
+        System.out.println(&quot;Error.Not a letter.Enter uppercase or lowercase letter.&quot;);
+    }
+    else if(vowels){
+        System.out.println(&quot;input letter is vowel&quot;);
+    }
+    else{
+        System.out.println(&quot;input letter is Consonent&quot;);
+    }
+	}   
+}</code></pre><h3 id="b8892fe5-4cee-4782-8645-ae67710a2b98" class=""><strong>Practical 3 -</strong></h3><figure id="cd42b00f-0e44-4d4b-935b-8e4a7fd1d058" class="image"><a href="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled.png"><img style="width:672px" src="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled.png"/></a></figure><figure id="3ccd2b57-c548-407c-8ec6-e8a8f83b913f" class="image"><a href="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%201.png"><img style="width:672px" src="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%201.png"/></a></figure><figure id="f54c2685-620b-4ff5-b3e7-81ae3c28fb6c" class="image"><a href="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%202.png"><img style="width:720px" src="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%202.png"/></a></figure><p id="c06dd218-21bc-47d1-9254-f58b952833bf" class="">Main Class -</p><figure id="cf180beb-e9df-4063-9b05-7b0aaeb1939a" class="image"><a href="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%203.png"><img style="width:720px" src="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%203.png"/></a></figure><figure id="11cb2c33-bfbe-4d1f-9e15-8939da5d936a" class="image"><a href="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%204.png"><img style="width:720px" src="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%204.png"/></a></figure><figure id="cc40216f-35dd-4952-89bf-dc421534a024" class="image"><a href="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%205.png"><img style="width:720px" src="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%205.png"/></a></figure><pre id="4ae55d9e-61a8-4abf-a4a6-e54d1dff391b" class="code"><code>package eb;
+ 
+import java.util.Scanner;
+ 
+public class EB {
+    public long consumerNumber;
+    public String consumerName;
+    public String consumerAddress;
+    public long noUnits;
+   
+    EB(long consumerNumber, String consumerName, String consumerAddress, long noUnits){
+        this.consumerNumber = consumerNumber;
+        this.consumerName = consumerName;
+        this.consumerAddress = consumerAddress;
+        this.noUnits = noUnits;
+    }
+ 
+    public void display() {
+        System.out.println(&quot;EletricityBill{&quot; + &quot;consumerNumber=&quot; + consumerNumber + &quot;, consumerName=&quot; + consumerName + &quot;, consumerAddress=&quot; + consumerAddress + &quot;, noUnits=&quot; + noUnits + &#x27;}&#x27;);
+    }
+    
+    public void calculate(){
+        long toPay = 0;
+        if(this.noUnits &lt;= 100){
+            toPay = 500;
+        }else if(this.noUnits &lt;= 200){
+            toPay = (1 * (this.noUnits - 100)) + 500;
+        }else if(this.noUnits &lt;= 300){
+            toPay = (long)(1.20 * (this.noUnits - 200)) + 100 * 1 + 500;
+        }else if(this.noUnits &gt; 300){
+            toPay = (long)((1.50 * (this.noUnits - 300)) + (100 * 1) + (100 * 1.2) + 500);
+        }
+        System.out.println(&quot;TOPAY = &quot; + toPay);
+    }
+    
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        System.out.println(&quot;enter all&quot;);
+        String cname = sc.next();
+   String add = sc.next();
+        long cnum = sc.nextLong();
+        long units = sc.nextLong();
+        EB eb = new EB(cnum, cname, add, units);
+        eb.calculate();
+        eb.display();
+    }
+}</code></pre><figure id="3c870142-ee3f-4785-a8c3-6db5d938ef68"><div class="source"><a href="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/CJ_Practical_4_-_Composition_in_Java_Classes.docx">https://s3-us-west-2.amazonaws.com/secure.notion-static.com/f7306e0e-5ac8-4dc0-a876-d6f7b616c545/CJ_Practical_4_-_Composition_in_Java_Classes.docx</a></div></figure><h3 id="f2f12f2b-abef-4754-8b02-d2290b9944cf" class=""><strong>Practical 5 -</strong></h3><figure id="898bae7a-2bcc-4697-ab01-8d6da0ad852d" class="image"><a href="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%206.png"><img style="width:699px" src="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%206.png"/></a></figure><pre id="9df13821-f2ca-434a-b87d-80cef66598f1" class="code"><code>// Multilevel Inheritance 
+
+// Main Class
+
+package practical5;
+ 
+public class Practical5 {
+ 
+    public static void main(String[] args) {
+        Executive e = new Executive(&quot;Amaan&quot;, 200000, &quot;Manager&quot;, &quot;Sion&quot;);
+        e.print();
+    }
+ 
+}
+
+// Employee class
+
+package practical5;
+public class Employee {
+    String name;
+    int salary;
+ 
+    public Employee(String name, int salary) {
+        this.name = name;
+        this.salary = salary;
+    }
+
+    public void print() {
+        System.out.println(&quot;name=&quot; + name + &quot;\nsalary=&quot; + salary);
+    }
+}
+
+// Manager class
+
+package practical5;
+ 
+public class Manager extends Employee{
+    String dept;
+ 
+    public Manager(String name, int salary, String dept) {
+        super(name, salary);
+        this.dept = dept;
+    }
+ 
+    public void print(){
+        super.print();
+        System.out.println(&quot;\nDept:&quot; + dept );
+    } 
+}
+
+// Executive Class
+
+package practical5;
+ 
+    public class Executive extends Manager{
+    String location;
+ 
+    public Executive(String name, int salary, String dept, String location) {
+        super(name, salary, dept);
+        this.location = location;
+    }
+ 
+    public void print(){
+        super.print();
+        System.out.println(&quot;\nLocattion:&quot; + location );
+    }
+}</code></pre><figure id="c2515de0-4f48-4d39-8862-e853b2307339" class="image"><a href="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%207.png"><img style="width:706px" src="CJ%20Practical%E2%80%99s%20ef0a7a2c44d144b7badd0a46a75b5049/Untitled%207.png"/></a></figure><pre id="3fa64b7f-9dd2-4f9b-ad1b-1580803b717d" class="code"><code>// Hierarchical Inheritance
+
+// Main class
+
+package practical5;
+public class Practical5 {
+ 
+    public static void main(String[] args) {
+        
+       CD c= new CD(&quot;Amaan&quot;,3,&quot;XYZ&quot;,&quot;MP3&quot;,5);
+       DVD d= new DVD(&quot;Mahesh Bhatt&quot;,&quot;Drama&quot;,&quot;POR&quot;,&quot;MP4&quot;,10);
+          c.print();
+          d.print();
+    }
+    
+}
+
+// Media Class
+
+package practical5;
+public class Media{
+    String title,format;
+    int duration;
+ 
+    public Media(String title, String format, int duration) {
+        this.title = title;
+        this.format = format;
+        this.duration = duration;
+    }
+    public void print(){
+       
+        System.out.println(&quot;Title&quot;+title + &quot;\nFormat&quot; + format + &quot;\nDuration&quot; + duration);
+    }
+            
+}
+
+// CD Class
+
+package practical5;
+ 
+public class CD extends Media {
+    String Artist;
+    int no_of_tracks;
+ 
+    public CD(String Artist, int no_of_tracks, String title, String format, int duration) {
+        super(title, format, duration);
+        this.Artist = Artist;
+        this.no_of_tracks = no_of_tracks;
+    }
+    public void print(){
+        super.print();
+        System.out.println(&quot;\nArtist :&quot; +Artist+&quot;\nNo of Tracks&quot;+no_of_tracks);
+    }
+    
+}
+
+// DVD Class
+
+package practical5;
+ 
+ 
+public class DVD extends Media {
+    String Director;
+    String Genere;
+    
+    public DVD(String title, String format, int duration) {
+        super(title, format, duration);
+        
+    }
+ 
+    public DVD(String Director, String Genere, String title, String format, int duration) {
+        super(title, format, duration);
+        this.Director = Director;
+        this.Genere = Genere;
+    }
+    public void print(){
+        super.print();
+        System.out.println(&quot;\nDirector&quot; +Director +&quot;\nGenre&quot;+Genere);
+    }
+}</code></pre><p id="465ddae8-5175-47f9-a48c-2c915f120a6c" class="">
+</p></div></article></body></html>

@@ -1,0 +1,931 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>COST Practical’s</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="3fa407fd-8bcc-4b3b-ad12-e88ce96e92e4" class="page sans"><header><div class="page-header-icon undefined"><img class="icon" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Page.png"/></div><h1 class="page-title"><mark class="highlight-teal">COST Practical’s</mark></h1></header><div class="page-body"><h3 id="1f23c160-72a0-4c3a-8b46-391b9820b3d7" class=""><strong>Practical 1 - </strong></h3><ol type="1" id="5eaa2a48-b86a-4cbb-89db-fe0b3c9c3361" class="numbered-list" start="1"><li>Write a code to display “Welcome to VSIT” message along with comment on screen and paste the screenshot in the box given below.</li></ol><figure id="9cc8850b-239b-47ce-ba7e-a0e087a2783f" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled.png"><img style="width:716px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled.png"/></a></figure><ol type="1" id="3c2c7feb-409c-4cfd-8b0c-0409bad30c24" class="numbered-list" start="2"><li>Write a code to display vector (1, 5, 6, 8, 10) on screen. Also display vector class. paste the screenshot in the box given below.</li></ol><figure id="4fc2cd31-9467-4ede-bcdf-c9be20f04257" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%201.png"><img style="width:716px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%201.png"/></a></figure><ol type="1" id="fe33a47e-2f2a-4e32-9dc0-a0f0f202cb2a" class="numbered-list" start="3"><li>Write a code to display vector of all the subjects in SYIT on screen. Also display vector class. paste the screenshot in the box given below.</li></ol><figure id="f2173e7b-8c43-4b5a-8c3b-d875643556a0" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%202.png"><img style="width:709px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%202.png"/></a></figure><ol type="1" id="7259e743-3ec4-41aa-b2c9-a81c8b8539a2" class="numbered-list" start="4"><li>Write a code to display vector of all the elements between 10 to 20 on screen. paste the screenshot in the box given below.</li></ol><figure id="bea14e21-5342-4478-bdd1-630aaf38612b" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%203.png"><img style="width:704px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%203.png"/></a></figure><ol type="1" id="505d8c2c-9acc-4bb8-b2e7-da42628f0cd8" class="numbered-list" start="5"><li>Write a code to add, subtract, multiply and divide two vectors (4, 8, 9, 10, 12) and (2, 4, 3, 5, 6). Paste the screenshot in the box given below.</li></ol><figure id="471d21e4-bb5f-4b83-b8a2-106d151b6199" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%204.png"><img style="width:710px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%204.png"/></a></figure><figure id="0f2d6208-32f7-4a93-a070-c255c3e026ca" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%205.png"><img style="width:710px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%205.png"/></a></figure><p id="573d65b0-3973-41db-82d3-cea2db1f14b3" class="">
+</p><h3 id="1364b86f-f25c-44c7-a60a-e02adf278486" class=""><strong>Practical 2 - </strong></h3><ol type="1" id="d65be147-e717-40e4-9e48-71ae8da33efb" class="numbered-list" start="1"><li>Write a code to display following matrices in R. Paste the screenshot of code and output the box given below.</li></ol><figure id="7189a972-3a33-45ba-b49a-da4360e24562" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%206.png"><img style="width:727px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%206.png"/></a></figure><ol type="1" id="b0b9aeab-aee5-4fb1-9660-fb95ce29b604" class="numbered-list" start="2"><li>Write a code to add, subtract, divide, and multiply the two matrices given below. Paste the screenshot of code and output in the box given below.</li></ol><figure id="b274aee3-cbb5-4cc6-94f2-c0aa202cf1ff" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%207.png"><img style="width:303px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%207.png"/></a></figure><figure id="3ca8117d-7f7b-47f0-96c1-648c2a2cb6d6" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%208.png"><img style="width:720px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%208.png"/></a></figure><ol type="1" id="e7cfe6fe-2cf8-446d-bdc9-c134df322ebc" class="numbered-list" start="3"><li>What is transpose of a matrix? Write a code to find transpose of a matrix A. Paste the screenshot of code and output in the box given below.</li></ol><figure id="440e9f7d-e292-4518-ad10-dde2ef30903a" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%209.png"><img style="width:108px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%209.png"/></a></figure><figure id="f2ee9cbc-f58c-4010-b549-b3d769f43175" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2010.png"><img style="width:715px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2010.png"/></a></figure><ol type="1" id="bf560bff-c1ff-4f5e-8b5f-b35795ebdee1" class="numbered-list" start="4"><li>Write a code to display following <strong>unit matrix </strong>of order<strong> 2x2 </strong>and<strong> 3x2. </strong>And<strong> zero matrix  </strong>of order <strong>3x3 </strong>and<strong> 2x3</strong>. Paste the screenshot in the box given below.</li></ol><figure id="75201e57-d01e-4ceb-a344-77a64fbb7aed" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2011.png"><img style="width:718px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2011.png"/></a></figure><ol type="1" id="1d65b1a2-9eb9-4c1e-97a6-678af18f3d1b" class="numbered-list" start="5"><li>Write a code to display diagonal matrix of the following matrix A. Paste the screenshot in the box given below.</li></ol><figure id="5f9341ae-a262-4850-99dd-cf52daf9c827" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2012.png"><img style="width:195px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2012.png"/></a></figure><figure id="caf60283-b972-4e97-8af5-c3f982ee084d" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2013.png"><img style="width:719px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2013.png"/></a></figure><ol type="1" id="86a0990a-d889-4abe-bebd-bf8976dbe3e1" class="numbered-list" start="6"><li>Write a code to find a determinant and Inverse of a matrix A and B. Paste the screenshot in the box given below.</li></ol><figure id="e546dfbd-b590-451b-9e62-12972ef40a46" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2014.png"><img style="width:264px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2014.png"/></a></figure><figure id="2b26d80c-5c17-41ca-ab9f-4dbd3a2f8c00" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2015.png"><img style="width:713px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2015.png"/></a></figure><p id="09d5d266-6bd6-426b-8bff-efc23704cbb5" class="">
+</p><h3 id="b3d11831-2858-41f5-a89e-b8de32a44660" class=""><strong>Practical 3 - </strong></h3><ol type="1" id="ad5fa1e3-893a-4ff2-b55c-02a3d524a7f4" class="numbered-list" start="1"><li>Create a list containing strings, numbers, vectors and a logical value.</li></ol><figure id="f758de35-0de0-4854-afd7-a881311955c9" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2016.png"><img style="width:741px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2016.png"/></a></figure><ol type="1" id="0517a48d-a4cd-41db-9618-c9f85ff8cc50" class="numbered-list" start="2"><li>Create a list containing a vector, a matrix and a list.</li></ol><figure id="e5c6b7ed-d0b4-4a12-9ab6-e0b6ab391011" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2017.png"><img style="width:742px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2017.png"/></a></figure><ol type="1" id="5df781bf-d73f-40f5-b2f3-6e5c2595c43c" class="numbered-list" start="3"><li>Manipulating List Elements - add, delete and update list elements as shown below.</li></ol><pre id="23b9b4cc-b76c-44c7-9887-b06af7f3523a" class="code"><code>b &lt;- list(c(&quot;Jan&quot;,&quot;Feb&quot;,&quot;Mar&quot;), matrix(c(1,2,3,4,5,6), nrow = 2),
+   list(&quot;red&quot;,1))
+ 
+# Add element “abc” at the end of the list -
+l= list(&quot;deepak&quot;,10,c(1,2,3),&quot;true&quot;)
+l1=append(l,&quot;satish kiran&quot;)
+ 
+Output  : &gt; l1
+[[1]]
+[1] &quot;deepak&quot;
+ 
+[[2]]
+[1] 10
+ 
+[[3]]
+[1] 1 2 3
+ 
+[[4]]
+[1] &quot;true&quot;
+ 
+[[5]]
+[1] &quot;satish kiran&quot;
+ 
+ 
+ 
+# Remove the last element -
+Input: l= list(&quot;deepak&quot;,10,c(1,2,3),&quot;true&quot;)
+l
+l1=append(l,&quot;satish kiran&quot;)
+l1
+l2=l1[-4]
+l2
+ 
+Output :
+&gt; l2
+[[1]]
+[1] &quot;deepak&quot;
+ 
+[[2]]
+[1] 10
+ 
+[[3]]
+[1] 1 2 3
+ 
+[[4]]
+[1] &quot;satish kiran&quot;
+ 
+ 
+ 
+# Print the 2nd  Element -
+Input: l= list(&quot;deepak&quot;,10,c(1,2,3),&quot;true&quot;)
+l
+l1=append(l,&quot;satish kiran&quot;)
+l1
+l2=l1[-4]
+l2
+l3=l2[2]
+l3
+
+Output: &gt; l3=l2[2]
+&gt; l3
+[[1]]
+[1] 10
+ 
+# Update the 3rd Element.(With “yes” ) -
+INPUT : l= list(&quot;deepak&quot;,10,c(1,2,3),&quot;true&quot;)
+l
+l1=append(l,&quot;satish kiran&quot;)
+l1
+l2=l1[-4]
+l2
+l3=l2[2]
+l3
+l4=l3[3]=&quot;yes&quot;
+l4
+ 
+OUTPUT; &gt; l4=l3[3]=&quot;yes&quot;
+&gt; l4
+[1] &quot;yes&quot;</code></pre><ol type="1" id="6e60724c-d6ba-429f-8141-b8e219ebc9b3" class="numbered-list" start="4"><li>Using following characters create String -</li></ol><p id="f9b865ad-b38e-4f19-aa81-c3490bd35179" class="">a &lt;- &quot;Hello&quot;
+b &lt;- &#x27;How&#x27;
+c &lt;- &quot;are you? &quot;
+print(paste(a,b,c))
+print(paste(a,b,c,sep=“-&quot;))</p><figure id="762efeed-630b-4dde-ac6d-e9f89fac6dea" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2018.png"><img style="width:737px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2018.png"/></a></figure><ol type="1" id="76fd731e-a421-449f-810a-4f835e4f1fd1" class="numbered-list" start="5"><li>Formatting strings.</li></ol><p id="45da046e-ce5a-454e-bbc7-9babc3dd23c9" class=""># Left justify strings.</p><p id="efa9fd7d-611f-4396-b816-0f2274b0b962" class="">result &lt;- format(&quot;Hello&quot;, width = 8, justify = &quot;l&quot;)</p><p id="28627c47-65be-430c-a427-c7f325776a8b" class="">print(result)</p><figure id="b6fbef26-0cdd-4b4a-96e7-0d3fac8b2488" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2019.png"><img style="width:480px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2019.png"/></a></figure><p id="cccc4dcb-deb2-46dc-90e8-4d6ff34638e5" class=""># Justfy string with center.
+result &lt;- format(&quot;Hello&quot;, width = 8, justify = &quot;c&quot;)
+print(result)</p><figure id="936b264d-960e-416d-bfca-baa431ba6451" class="image"><a href="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2020.png"><img style="width:480px" src="COST%20Practical%E2%80%99s%203fa407fd8bcc4b3bad12e88ce96e92e4/Untitled%2020.png"/></a></figure><p id="6b4f2684-f858-457e-b096-669bcaed64c2" class="">
+</p><h3 id="d538fd21-af70-472c-8672-d8670207849d" class=""><strong>Practical 4 - </strong></h3><pre id="e89ee068-8659-445e-ac8a-645799e4c7c4" class="code"><code># Mean and Median
+# Write a code to find mean and median of vales – 15, 11, 14, 13, 18, 16. Make use of functions length(), sum() and sort(). Paste the screenshot of code and output in the box given below.
+
+A = c(15,11,14,13,18,16)
+
+mean(A)
+median(A)
+length(A)
+sum(A)
+sort(A)</code></pre><pre id="94e05d22-7740-4af7-8c67-6fe0a8919b15" class="code"><code># Range
+# Write a code to display maximum value, minimum value, and range of the data set- 44, 62, 29, 9, 11. Paste the screenshot of code and output in the box given below.
+
+B = c(44,62,29,9,11)
+
+max(B)
+min(B)
+range(62-9)</code></pre><pre id="ada26838-d52a-4249-9e54-0adae4cbeb42" class="code"><code># Mean Deviation and Standard Deviation
+# Write a code to find mean deviation, standard deviation and variance of the data set 4,5,8,2,3,6.
+
+c = c(4,5,8,2,3,6)
+
+mad(c) # Mean Absolute Deviation
+sd(c) # Standard Deviation
+var(c) # Variance</code></pre><pre id="41b04faa-918b-4839-8c07-90da0b4de935" class="code"><code># Quartiles and Quartile Deviation
+# Write a code to find Q1, Q2, Q3 and interquartile range of the data set 1, 3, 5, 7, 9. Paste the screenshot of code and output in the box given below.
+
+data = c(1,3,5,7,9)
+
+quantile(data,prob = c(0.25,0.50,0.75))
+
+IQR(data)</code></pre><pre id="54d189a1-a1bd-40af-b0de-87ab864b662c" class="code"><code># Mode
+# Write a code to find mode of the data set 1, 3, 3, 5, 7, 9. Paste the screenshot of code and output in the box given below.
+
+library(modeest)
+a = c(1,3,3,5,7,9)
+m = mfv(a)
+print(m)</code></pre><pre id="aa057563-52f8-419c-a256-482720c6d20f" class="code"><code># Descriptive Statistics
+# Write a code to find Mean, median, mode, Q1, Q2, Q3, interquartile range, mean deviation, SD and variance of the data set- 10, 20, 30, 40, 50, 60, 60, 70, 80, 90, 100. 
+
+A = c(10,20,30,40,50,60,70,80,90,100)
+
+mean(A)
+median(A)
+library(modeest)
+
+m = mfv(A)
+print(m)
+IQR(A)
+
+data = c(10,20,30,40,50,60,70,80,90,100)
+
+quantile(data,prob=c(0.25,0.50,0.75))
+mad(c)
+sd(c)
+var(c)</code></pre><pre id="2032e28f-d4eb-457e-9097-7565aa1d0096" class="code"><code># Import the data from Excel/.CSV file and perform the mean and Median. 
+# Dataset link - CardioGoodFitness.csv
+
+# Path - C:\Users\admin\Downloads\CardioGoodFitness.csv
+
+myData = read.csv(&quot;C:/Users/admin/Downloads/CardioGoodFitness.csv&quot;,stringsAsFactors=F) 
+
+print(head(myData)) 
+mean=mean(myData$Age) 
+print(mean) 
+median=median(myData$Age) 
+print(median</code></pre><p id="29df0231-0c3d-4741-93f3-adf1f51f6741" class="">
+</p><h3 id="d296c576-17d8-49b3-9568-9774ab9485db" class=""><strong>Practical 5A - </strong></h3><pre id="afcd8229-6942-4f74-b604-5abd5b5819ee" class="code"><code># Import the data from Excel/.CSV file and find the mean and Median of math score, reading score &amp; writing score
+# Dataset - StudentsPerformance.csv
+
+mydata = read.csv(&quot;C:\\Users\\admin\\Downloads\\StudentsPerformance.csv&quot;)
+
+mean_ms = mean(mydata$math.score)
+print(mean_ms)
+mean_rs = mean(mydata$reading.score)
+print(mean_rs)
+ 
+mean_wr = mean(mydata$writing.score)
+print(mean_wr)
+median_ms = median(mydata$math.score)
+print(median_ms)
+ 
+median_rs = median(mydata$reading.score)
+print(median_rs)
+ 
+median_wr = median(mydata$writing.score)
+print(median_wr)</code></pre><pre id="f8fa833a-8380-4132-98cf-8bc8e3c3fa63" class="code"><code># Using the same dataset calculate S.D &amp; Variance of math score, reading score &amp; writing score.
+
+mydata = read.csv(&quot;C:\\Users\\admin\\Downloads\\StudentsPerformance.csv&quot;)
+
+ms = (mydata$math.score)
+sd(ms)
+var(ms)
+rs = (mydata$reading.score)
+sd(rs)
+var(rs)
+wr = (mydata$writing.score)
+sd(wr)
+var(wr)</code></pre><pre id="477f9949-41ba-4fd9-bf51-a551435c2646" class="code"><code># Define correlation and covariance of variable.
+# Calculate covariance &amp; correlation between the  math score &amp; reading score , reading score &amp; writing score, math score &amp; writing score
+
+myData = read.csv(&quot;C:\\Users\\admin\\Downloads\\StudentsPerformance.csv&quot;)
+
+A=cor(myData$math.score,myData$reading.score)
+print(A)
+B=cor(myData$reading.score,myData$writing.score)
+print(B)
+C=cor(myData$math.score,myData$writing.score)
+print(C)
+E=cov(myData$math.score,myData$reading.score)
+print(E)
+G=cov(myData$reading.score,myData$writing.score)
+print(G)
+H=cov(myData$math.score,myData$writing.score)
+print(H)</code></pre><pre id="a1117446-93b7-4dc5-b20d-dd6d9e7264c6" class="code"><code># Define Skewness and Kurtosis.
+# Calculate Skewness and Kurtosis of math score &amp; reading score , reading score &amp; writing score, math score &amp; writing score.
+
+library(moments)
+
+mydata = read.csv(&quot;C:\\Users\\admin\\Downloads\\StudentsPerformance.csv&quot;)
+
+skewness(mydata$math.score)
+skewness(mydata$reading.score)
+skewness(mydata$writing.score) 
+kurtosis(mydata$math.score)
+kurtosis(mydata$reading.score)
+kurtosis(mydata$writing.score)</code></pre><p id="aa177ec3-92d2-407c-aa7b-3886512101a4" class="">
+</p><h3 id="a8dc724b-77dc-4389-aefa-f5de249d6da9" class=""><strong>Practical 5B - </strong></h3><pre id="b9be5ed5-77ba-418f-8029-68da72ec8de6" class="code"><code># Import the data from Excel/.CSV file and find the mean and Median of Age and Income variables. 
+# Dataset link - CardioGoodFitness.csv
+
+mydata = read.csv(&quot;C:\\Users\\admin\\Downloads\\CardioGoodFitness.csv&quot;)
+ 
+print(head(mydata))
+mean_sol = mean(mydata$Age)
+print(&quot;Mean&quot;)
+print(mean_sol)
+median_sol = median(head(mydata$Age))
+print(&quot;Median&quot;)
+print(median_sol)</code></pre><pre id="1656ad93-6792-46d6-ba8e-fddab1859b55" class="code"><code># Using the same dataset calculate S.D &amp; Variance of Age, Income and Education.
+
+mydata = read.csv(&quot;C:\\Users\\admin\\Downloads\\CardioGoodFitness.csv&quot;)
+
+print(head(mydata))
+sd_Age = sd(mydata$Age)
+print(sd_Age)
+sd_Income = sd(mydata$Income)
+print(sd_Income)
+sd_Education = sd(mydata$Education)
+print(sd_Education)
+var_Age = var(mydata$Age)
+print(var_Age)
+var_Income = var(mydata$Income)
+print(var_Income)
+var_Edu = var(mydata$Education)
+print(var_Edu)</code></pre><pre id="5cdaaff8-2148-4915-806c-5ae690b799b6" class="code"><code># Define correlation and covariance of variable.
+# Calculate covariance &amp; correlation between the  Age and Income , Age and Fitness variables.
+
+mydata = read.csv(&quot;C:\\Users\\admin\\Downloads\\CardioGoodFitness.csv&quot;)
+
+print(head(mydata))
+cov(mydata$Age, mydata$Income)
+cov(mydata$Age, mydata$Fitness)
+cor(mydata$Age, mydata$Income)
+cor(mydata$Age, mydata$Fitness)</code></pre><pre id="afc2422c-de92-4df7-86ae-33a0fa40ab4b" class="code"><code># Define Skewness and Kurtosis.
+# Calculate Skewness and Kurtosis of Income and Education.
+
+Installing Package
+Install.package(“moments”)
+Library(moments)
+
+mydata = read.csv(&quot;C:\\Users\\admin\\Downloads\\CardioGoodFitness.csv&quot;)
+
+skewness(mydata$Income)
+skewness(mydata$Education)
+kurtosis(mydata$Income)
+kurtosis(mydata$Education)</code></pre><p id="9048b8af-4476-4b49-b660-459ab0278988" class="">
+</p></div></article></body></html>
