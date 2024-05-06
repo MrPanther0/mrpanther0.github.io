@@ -1,0 +1,229 @@
+Application Bar
+a) Design a mobile application to demonstrate working of App Bar
+
+MainActivity.Kt :-
+package com.example.practical5
+  
+ import android.support.v7.app.AppCompatActivity
+  import android.os.Bundle
+  import android.view.Menu
+  import android.view.MenuItem
+  import android.widget.Toast
+  
+ class MainActivity : AppCompatActivity() {
+      override fun onCreate(savedInstanceState: Bundle?) {
+          super.onCreate(savedInstanceState)
+          setContentView(R.layout.activity_main)
+  
+ 
+        val myBar = supportActionBar
+          myBar!!.title = "My New Action Bar"
+          myBar.subtitle = "its new one"
+          myBar.setIcon(R.drawable.phone)
+          myBar.setDisplayUseLogoEnabled(true)
+          myBar.setDisplayShowHomeEnabled(true)
+  
+     }
+  
+     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+          menuInflater.inflate(R.menu.menu1,menu)
+          return super.onCreateOptionsMenu(menu)
+      }
+  
+     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+          when(item.itemId){
+              R.id.copy -> Toast.makeText( this, "copy",Toast.LENGTH_SHORT).show()
+              R.id.chat -> Toast.makeText( this, "chat",Toast.LENGTH_SHORT).show()
+              R.id.football -> Toast.makeText( this, "football",Toast.LENGTH_SHORT).show()
+              R.id.location-> Toast.makeText( this, "location",Toast.LENGTH_SHORT).show()
+  
+         }
+          return super.onOptionsItemSelected(item)
+      }
+  }
+
+AndroidManifest.xml:-
+<?xml version="1.0" encoding="utf-8"?>
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      package="com.example.practical5">
+  
+     <application
+          android:allowBackup="true"
+          android:dataExtractionRules="@xml/data_extraction_rules"
+          android:fullBackupContent="@xml/backup_rules"
+          android:icon="@drawable/football"
+          android:label="@string/app_name"
+          android:roundIcon="@drawable/football"
+          android:supportsRtl="true"
+          android:theme="@style/Theme.Practical5"
+          tools:targetApi="31">
+          <activity
+              android:name=".MainActivity"
+              android:exported="true">
+              <intent-filter>
+                  <action android:name="android.intent.action.MAIN" />
+  
+                 <category android:name="android.intent.category.LAUNCHER" />
+              </intent-filter>
+          </activity>
+      </application>
+  
+ </manifest>
+
+Menu1.xml :-
+<?xml version="1.0" encoding="utf-8"?>
+  <menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools">
+  
+     <item android:id="@+id/football"
+          android:title="football"
+          android:icon="@drawable/football"
+          android:orderInCategory="100"
+          app:showAsAction="ifRoom"/>
+  
+     <item android:id="@+id/chat"
+          android:title="chat"
+          android:icon="@drawable/chat"
+          android:orderInCategory="101"
+          app:showAsAction="ifRoom"/>
+  
+     <item android:id="@+id/location"
+          android:title="location"
+          android:icon="@drawable/location"
+          android:orderInCategory="103"
+          app:showAsAction="never"/>
+  
+     <item android:id="@+id/copy"
+          android:title="copy"
+          android:icon="@drawable/copy"
+          android:orderInCategory="104"
+          app:showAsAction="never"/>
+  
+ </menu>
+
+Strings.xml:-
+<resources>
+      <string name="app_name">My Action Bar</string>
+  </resources>
+
+Login Form
+b) Design a mobile application to create a login form
+
+Activity_main.xml:
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="383dp"
+        android:layout_height="431dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="271dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="What is your name?"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/edtxtname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter your name..."
+            android:inputType="text"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="What is your E-mail ID?"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/edtxtemail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter your E-mail..."
+            android:inputType="text"
+            android:textSize="24sp" />
+        <TextView
+            android:id="@+id/show"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="24sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="127dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnsubmit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="SUBMIT" />
+            <Button
+                android:id="@+id/btnreset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="RESET" />
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+MainActivity.kt File:
+package com.example.trial10
+
+import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState) setContentView(R.layout.activity_main)
+        val name = findViewById<EditText>(R.id.edtxtname)
+        val email = findViewById<EditText>(R.id.edtxtemail)
+        val submit = findViewById<Button>(R.id.btnsubmit)
+        val reset = findViewById<Button>(R.id.btnreset)
+        val show = findViewById<TextView>(R.id.show)
+
+        submit.setOnClickListener {
+            show.setText("Name: "+name.text.toString()+"\nEmail: "+email.text.toString())
+            Toast.makeText(this,"Record Submitted!",Toast.LENGTH_LONG).show()
+        }
+        reset.setOnClickListener {
+            name.text.clear()
+            email.text.clear()
+            show.setText("")
+            Toast.makeText(this,"RecordCleared!",Toast.LENGTH_LONG).show()
+        }
+    }
+}
+
+private infix fun Any.setContentView(activityMain: Int) {
+
+}

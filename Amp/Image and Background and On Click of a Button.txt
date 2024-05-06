@@ -1,0 +1,122 @@
+Image and Background
+a) Design an Activity with an image and its background colour set.
+
+Activity_main:
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/krishna"
+        android:textColor="@color/textcolor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="170dp"
+        android:layout_height="320dp"
+        app:layout_constraintBottom_toTopOf="@+id/textView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/img1"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/buttonbg"
+        android:text="@string/click_me"
+        android:textColor="@color/textcolor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        tools:ignore="MissingConstraints" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+MainActivity:
+package com.example.trail7
+
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+    }
+}
+
+String:
+<resources>
+    <string name="app_name">trail7</string>
+    <string name="My_Work">pra2.1</string>
+    <string name="krishna">Krishna</string>
+    <string name="click_me">Click Me</string>
+</resources>
+
+Color:
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="bg">#FF000000</color>
+    <color name="textcolor">#FFFFFFFF</color>
+    <color name="buttonbg">#FF0000</color>
+</resources>
+
+On Click of a Button
+b) Design an Activity where on Click of a button the image should change.
+
+MainActivity:
+package com.example.trial8
+
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.Button
+import android.widget.ImageView
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        lateinit var imageView: ImageView
+
+        lateinit var button: Button
+        var isImage1 = true
+
+
+
+        imageView = findViewById(R.id.imageView)
+        button = findViewById(R.id.button)
+
+        button.setOnClickListener {
+            // Change the image when the button is clicked
+            if (isImage1) {
+                imageView.setImageResource(R.drawable.img2)
+            } else {
+                imageView.setImageResource(R.drawable.img1)
+            }
+
+            // Toggle the flag to switch between images
+            isImage1 = !isImage1
+        }
+    }
+}
+
+
+

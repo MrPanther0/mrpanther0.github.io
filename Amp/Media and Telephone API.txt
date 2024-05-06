@@ -1,0 +1,274 @@
+Media API
+a) To create a program to access music (media) in your mobile phone.
+
+MainActivity.kt:
+package com.example.tiral
+
+import android.media.MediaPlayer
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var mp: MediaPlayer
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        mp = MediaPlayer.create(this,R.raw.meramusic)
+        var position = 0
+        var button = findViewById<Button>(R.id.button)
+        var button2 = findViewById<Button>(R.id.button2)
+        var button3 = findViewById<Button>(R.id.button3)
+        var button4 = findViewById<Button>(R.id.button4)
+        var button5 = findViewById<Button>(R.id.button5)
+
+        button.setOnClickListener {
+            mp.start()
+            mp.isLooping = button5.text != "Do not play in a circular way"
+            Toast.makeText(this,"Music is Playing",Toast.LENGTH_LONG).show()
+        }
+
+        button2.setOnClickListener {
+            if (mp.isPlaying){
+                position = mp.currentPosition
+                mp.pause()
+                Toast.makeText(this,"Music is Paused",Toast.LENGTH_LONG).show()
+            }
+        }
+
+        button3.setOnClickListener {
+            if(!mp.isPlaying){
+                mp.seekTo(position)
+                mp.start()
+            }
+        }
+
+        button4.setOnClickListener {
+            mp.pause()
+            position = 0
+            mp.seekTo(0)
+        }
+
+        button5.setOnClickListener {
+            if (button5.text == "Do not play in a circular way")
+                button5.text = "Play in circular form"
+            else
+                button5.text = "Do not play in circular form"
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mp.release()
+    }
+}
+
+Activity_main.xml:
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="109dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="150dp"
+        android:layout_marginTop="65dp"
+        android:backgroundTint="#EFC635"
+        android:text="Play" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="109dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="150dp"
+        android:layout_marginTop="150dp"
+        android:backgroundTint="#871353"
+        android:text="Pause" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="109dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="150dp"
+        android:layout_marginTop="235dp"
+        android:backgroundTint="#A6FD05"
+        android:text="Continue" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="109dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="150dp"
+        android:layout_marginBottom="280dp"
+        android:backgroundTint="#E12222"
+        android:text="Stop" />
+
+    <Button
+        android:id="@+id/button5"
+        android:layout_width="109dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="150dp"
+        android:layout_marginBottom="200dp"
+        android:backgroundTint="#747ED6"
+        android:text="Button" />
+</RelativeLayout>
+
+Telephone API
+b) To create a program that uses the calling feature of android mobile phones.
+
+Activity_main.xml:
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TYPE YOUR NUMBER"
+        android:textAlignment="center"
+        android:textSize="36sp"
+        android:textStyle="bold"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/phoneno"
+        android:hint="Moblile Number"
+        android:inputType="phone"
+        tools:ignore="missing"/>
+
+    <Button
+        android:id="@+id/btncall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="CALL"
+        tools:ignore="missing"/>
+
+</LinearLayout>
+
+MainActivity.kt:
+package com.example.trial2
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var btnphonecall: Button
+    private lateinit var editphoneNo: EditText
+    private val requestCall = 1
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        title = "Time Do"
+        editphoneNo = findViewById(R.id.phoneno)
+        btnphonecall = findViewById(R.id.btncall)
+        btnphonecall.setOnClickListener {
+            makeCall()
+        }
+    }
+    private fun makeCall() {
+        val callingNo: String = editphoneNo.text.toString()
+        if (callingNo.trim { it <= ' ' }.isNotEmpty()) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.CALL_PHONE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.CALL_PHONE),
+                    requestCall
+                )
+            } else {
+                val dial ="tel:$callingNo"
+                startActivity(Intent(Intent.ACTION_CALL,Uri.parse(dial)))
+            }
+        } else {
+            Toast.makeText(this, "Enter the Number", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == requestCall) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                makeCall()
+            } else {
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+}
+
+
+AndroidManifest.xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.trial2">
+
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false"/>
+
+    <uses-permission
+        android:name="android.permission.CALL_PHONE"/>
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Trial2"
+        tools:targetApi="31">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

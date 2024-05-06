@@ -1,0 +1,246 @@
+Activity Life Cycle
+a) To demonstrate the working of Activity and its Life Cycle.
+
+MainAcitivity:
+package com.example.trial9
+
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.Toast
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        val toast = Toast.makeText(this, "ON CREATE CALLED", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val toast = Toast.makeText(this, "ON START CALLED", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        val toast = Toast.makeText(this, "ON STOP CALLED", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val toast = Toast.makeText(this, "ON PAUSE CALLED", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val toast = Toast.makeText(this, "ON RESUME CALLED", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onDestroy() {
+        val toast = Toast.makeText(this, "ON DESTROY CALLED", Toast.LENGTH_LONG).show()
+        super.onDestroy()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        val toast = Toast.makeText(this, "ON RESTART CALLED", Toast.LENGTH_LONG).show()
+    }
+}
+
+Fragment Life Cycle
+b) To demonstrate the working of Fragments and its Life Cycle.
+
+Activity_Main.xml:
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="409dp"
+        android:layout_height="354dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/framelayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/button6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onClickSignUp"
+            android:text="SignUp" />
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onClickLogin"
+            android:text="Login" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/framelayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="-16dp"
+        tools:layout_editor_absoluteY="0dp">
+
+    </FrameLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+MainActivity.kt:
+package com.example.prac32
+
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+    }
+}
+
+LayoutSingiup.xml:
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F44336"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Sign_UP"
+        android:textColor="#FFFFFF"
+        android:background="#F44336"
+        android:textStyle="bold"/>
+</LinearLayout>
+
+
+
+SignupFragement.kt:
+package com.example.prac32
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+
+class SignupFragment : Fragment() {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.layout_signup, container, false)
+    }
+}
+
+LayoutLogin.xml:
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F44336"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Long_in"
+        android:textColor="#FFFFFF"
+        android:background="#F44336"
+        android:textStyle="bold"/>
+
+</LinearLayout>
+
+LoginFragment.kt:
+package com.example.prac32
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+
+class LoginFragment : Fragment() {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.layout_login, container, false)
+    }
+}
+
+Value/themes.xml:
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.prac32" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">#145836</item>
+        <item name="colorPrimaryDark">#845295</item>
+        <item name="colorAccent">#987563</item>
+        <!-- Customize your theme here. -->
+    </style>
+    <style name="Theme.prac32.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="Theme.Practical3B.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+    <style name="Theme.Practical3B.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+</resources>
+
+
+Night\themes.xml:
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.prac32" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">#812365</item>
+        <item name="colorPrimaryDark">#852348</item>
+        <item name="colorAccent">#748596</item>
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Theme.prac32.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="Theme.Practical3B.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="Theme.Practical3B.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+</resources>
+
+
+Colors.xml:
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
