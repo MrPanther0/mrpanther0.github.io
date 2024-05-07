@@ -1,0 +1,12 @@
+data<-read.csv("Book1 3.csv")
+x<-data$Height
+y<-data$Weight
+
+relation = lm(y~x)
+print(summary(relation))
+a = data.frame(x=170)
+result = predict(relation,a)
+print(result)
+png(file = "linearregression.png")
+plot(y,x,col = "blue",main = "Height & Weight Regression",abline(lm(x~y)),cex = 1.3,pch = 16,xlab = "Weight in Kg",ylab = "Height in cm")
+dev.off()
