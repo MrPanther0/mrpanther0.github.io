@@ -1,4 +1,4 @@
-<html lang="en" class="focus-outline-visible"><head>
+<html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shaibaz Kadhonchi - Resume</title>
@@ -7,19 +7,38 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f2f9fd; /* Light blue background */
+            background-color: #000000; /* Light blue background */
+            overflow: hidden; /* Prevents horizontal scrolling */
+            position: relative; /* Required for absolute positioning of torch */
         }
+        .torch {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Ensures the torch doesn't interfere with mouse events */
+            z-index: -20; /* Behind the content */
+            mix-blend-mode: screen; /* Blending mode to create light effect */
+        }
+        .light {
+            position: absolute;
+            width: 200px; /* Size of the light circle */
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 20%, transparent 80%); /* Light gradient */
+            pointer-events: none; /* Ensures the light doesn't interfere with mouse events */
+            z-index: -1; /* Behind the content */
+            opacity: 10; /* Initially hidden */
+            transition: opacity 0.3s ease; /* Fade-in transition */
+        }
+        
         .container {
             max-width: 800px;
             margin: 20px auto;
-            padding: 20px;
-            background-color: #ffffff; /* White container background */
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1, h2, h3 {
-            margin-top: 0;
-            color: #0066ff; /* Blue header text */
+            padding: 0px;
+            
+            position: relative;
         }
         .section {
             margin-bottom: 20px;
@@ -32,12 +51,7 @@
         .experience {
             margin-bottom: 30px;
         }
-        .education h2,
-        .skills h2,
-        .experience h2 {
-            margin-bottom: 10px;
-            color: #0099ff; /* Blue section header text */
-        }
+        
         .experience .job {
             margin-bottom: 20px;
         }
@@ -50,61 +64,124 @@
             color: #000000; /* Black list text */
         }
         .additional-info ul {
-            margin: 0;
+            
             padding-left: 20px;
         }
         .additional-info ul li {
             list-style-type: disc;
             color: #000000; /* Black list text */
         }
+        
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Shaibaz Kadhonchi</h1>
-            <div class="contact-info">
-                <p><strong>Date of Birth:</strong> October 1, 2001</p>
-                <p><strong>Phone:</strong> 9082372383</p>
-                <p><strong>Email:</strong> 5shaibazkadhonchi@gmail.com</p>
+    <div class="torch"></div>
+    <div class="light" style="left: 917px; top: 429px; opacity: 0;"></div>
+
+    <!-- Your content goes here -->
+        <div class="container">
+            <header>
+                <h1>Shaibaz Kadhonchi</h1>
+                <div class="contact-info">
+                    <p><strong>Date of Birth:</strong> October 1, 2001</p>
+                    <p><strong>Phone:</strong> 9082372383</p>
+                    <p><strong>Email:</strong> 5shaibazkadhonchi@gmail.com</p>
+                </div>
+            </header>
+            <div class="section education">
+                <h2>Education</h2>
+                <p><strong>Bachelor of Science (BSc) in Physics</strong><br>
+                Bhartiya Vidya Bhavans, Graduated in 2024</p>
+                <p><strong>Higher Secondary (12th Grade)</strong><br>
+                Bhartiya Vidya Bhavans, Passed in 2021, Percentage: 80%</p>
+                <p><strong>Secondary (10th Grade)</strong><br>
+                Worli Seaface MCGM English School, Passed in 2019, Percentage: 71.40%</p>
             </div>
-        </header>
-        <div class="section education">
-            <h2>Education</h2>
-            <p><strong>Bachelor of Science (BSc) in Physics</strong><br>
-            Bhartiya Vidya Bhavans, Graduated in 2024</p>
-            <p><strong>Higher Secondary (12th Grade)</strong><br>
-            Bhartiya Vidya Bhavans, Passed in 2021, Percentage: 80%</p>
-            <p><strong>Secondary (10th Grade)</strong><br>
-            Worli Seaface MCGM English School, Passed in 2019, Percentage: 71.40%</p>
-        </div>
-        <div class="section skills">
-            <h2>Skills</h2>
-            <p><strong>Expertise:</strong> Mathematics</p>
-            <p><strong>Experience:</strong> 3+ years</p>
-            <p><strong>Teaching Experience:</strong> Mathematics for 8th, 9th, 10th, 11th, and 12th grades</p>
-        </div>
-        <div class="section experience">
-            <h2>Experience</h2>
-            <div class="job">
-                <p><strong>Mathematics Tutor</strong></p>
-                <p>ACIES Classes, 3+yrs</p>
+            <div class="section skills">
+                <h2>Skills</h2>
+                <p><strong>Expertise:</strong> Mathematics</p>
+                <p><strong>Experience:</strong> 3+ years</p>
+                <p><strong>Teaching Experience:</strong> Mathematics for 8th, 9th, 10th, 11th, and 12th grades</p>
+            </div>
+            <div class="section experience">
+                <h2>Experience</h2>
+                <div class="job">
+                    <p><strong>Mathematics Tutor</strong></p>
+                    <p><strong> ACIES Classes, 3+yrs </strong></p>
+                    <ul>
+                        <li>Provided comprehensive tutoring in mathematics to students in 8th, 9th, 10th, 11th, and 12th grades.</li>
+                        <li>Developed tailored lesson plans to address individual student needs and learning styles.</li>
+                        <li>Fostered a supportive and engaging learning environment to promote student success.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="section additional-info">
+                <h2>Additional Information</h2>
                 <ul>
-                    <li>Provided comprehensive tutoring in mathematics to students in 8th, 9th, 10th, 11th and 12th grades.</li>
-                    <li>Developed tailored lesson plans to address individual student needs and learning styles.</li>
-                    <li>Fostered a supportive and engaging learning environment to promote student success.</li>
+                    <li>Strong interpersonal and communication skills.</li>
+                    <li>Passionate about helping students succeed in mathematics.</li>
+                    <li>Proven track record of improving student performance and confidence.</li>
                 </ul>
             </div>
         </div>
-        <div class="section additional-info">
-            <h2>Additional Information</h2>
-            <ul>
-                <li>Strong interpersonal and communication skills.</li>
-                <li>Passionate about helping students succeed in mathematics.</li>
-                <li>Proven track record of improving student performance and confidence.</li>
-            </ul>
-        </div>
-    </div>
+    <script>
+        const light = document.querySelector('.light');
+
+        document.addEventListener('mousemove', (e) => {
+            const xPos = e.clientX;
+            const yPos = e.clientY;
+
+            // Adjust the position of the light to match the cursor position
+            light.style.left = `${xPos - 100}px`; // Offset by half of the light size
+            light.style.top = `${yPos - 100}px`; // Offset by half of the light size
+
+            // Show the light
+            light.style.opacity = 10;
+        });
+
+        document.addEventListener('mouseleave', () => {
+            // Hide the light when the mouse leaves the window
+            light.style.opacity = 0;
+        });
+    </script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
 
 
 </body></html>
