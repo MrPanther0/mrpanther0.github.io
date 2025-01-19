@@ -1,0 +1,221 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio of Saurav Prajapati - Ethical Hacker and Cybersecurity Enthusiast">
+    <title>Saurav Prajapati | Cybersecurity Portfolio</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #0d0d0d;
+            color: #00ff00;
+            line-height: 1.6;
+        }
+
+        a {
+            color: #00ff00;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        header {
+            background: #111;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #00ff00;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            color: #00ff00;
+        }
+
+        header p {
+            font-size: 1.2em;
+        }
+
+        nav {
+            margin-top: 10px;
+        }
+
+        nav a {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        section {
+            margin: 30px 0;
+        }
+
+        h2 {
+            font-size: 2em;
+            border-bottom: 2px solid #00ff00;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .skills, .projects, .experience {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .card {
+            background: #111;
+            border: 2px solid #00ff00;
+            padding: 15px;
+            flex: 1 1 calc(30% - 20px);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        footer {
+            background: #111;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 20px;
+            border-top: 2px solid #00ff00;
+        }
+
+        footer p {
+            font-size: 0.9em;
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 500px;
+            margin: auto;
+        }
+
+        .contact-form input, .contact-form textarea {
+            padding: 10px;
+            font-family: inherit;
+            border: 2px solid #00ff00;
+            background: #0d0d0d;
+            color: #00ff00;
+        }
+
+        .contact-form input[type="submit"] {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .contact-form input[type="submit"]:hover {
+            background: #00ff00;
+            color: #0d0d0d;
+        }
+
+        .social-links {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .social-links a {
+            margin: 0 10px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Saurav Prajapati</h1>
+        <p>Ethical Hacker | Cybersecurity Enthusiast | SOC Analyst Aspirant</p>
+        <nav>
+            <a href="#about">About</a>
+            <a href="#skills">Skills</a>
+            <a href="#projects">Projects</a>
+            <a href="#experience">Experience</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <section id="about">
+            <h2>About Me</h2>
+            <p>Hello! I'm Saurav Prajapati, a cybersecurity enthusiast with a strong passion for securing digital systems. With a BSc in IT Studies and certifications like EHCCI, SQL Injection Attacks, and EHE, I specialize in vulnerability assessments and penetration testing. I am on a mission to make the digital world safer.</p>
+        </section>
+
+        <section id="skills">
+            <h2>Skills & Tools</h2>
+            <div class="skills">
+                <div class="card">Programming: Python, PHP, Bash</div>
+                <div class="card">Cybersecurity: Ethical Hacking, Linux, Penetration Testing</div>
+                <div class="card">Web Development: HTML, CSS, JavaScript</div>
+                <div class="card">Tools: Nmap, Metasploit, Burp Suite, Dalfox, Nuclei</div>
+                <div class="card">Certifications: EHE, EHCCI, SQL Injection Attacks</div>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2>Projects</h2>
+            <div class="projects">
+                <div class="card">
+                    <h3>IP Changer</h3>
+                    <p>A tool to anonymize IP addresses by dynamically rotating them.</p>
+                </div>
+                <div class="card">
+                    <h3>MAC Changer</h3>
+                    <p>Automates the process of spoofing MAC addresses to enhance anonymity.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience">
+            <h2>Education & Experience</h2>
+            <div class="experience">
+                <div class="card">
+                    <h3>BSc in IT Studies</h3>
+                    <p>Graduated with a strong foundation in information technology and cybersecurity principles.</p>
+                </div>
+                <div class="card">
+                    <h3>Internship at Synclature</h3>
+                    <p>Conducted vulnerability assessments and penetration tests from February 2023 to June 2023, identifying critical vulnerabilities and proposing remediation strategies.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Contact Me</h2>
+            <form class="contact-form">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+                <input type="submit" value="Send">
+            </form>
+
+            <div class="social-links">
+                <a href="https://www.linkedin.com/in/saurav-prajapati-6a0539234/" target="_blank">LinkedIn</a>
+                <a href="https://github.com/MrPanther0/" target="_blank">GitHub</a>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>© 2025 Saurav Prajapati. All rights reserved.</p>
+    </footer>
+</body>
+</html>
