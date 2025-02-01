@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P4nTh3r | Cyber Security Specialist</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --neon-green: #0f0;
+            --neon-blue: #08f;
+            --matrix-green: #00ff4c;
+            --cyber-dark: #000209;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--cyber-dark);
+            color: var(--neon-green);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .cyber-border {
+            position: relative;
+            border: 3px solid var(--neon-green);
+            box-shadow: 0 0 15px var(--neon-green),
+                        inset 0 0 15px var(--neon-green);
+        }
+
+        .cyber-box {
+            background: linear-gradient(45deg, #000 0%, #001 100%);
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-box:hover {
+            transform: translate(-5px, -5px);
+            box-shadow: 5px 5px 0 var(--neon-blue);
+        }
+
+        .cyber-title {
+            font-size: 3rem;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--neon-green),
+                       0 0 20px var(--neon-green),
+                       0 0 30px var(--neon-green);
+            animation: neonPulse 1.5s infinite alternate;
+        }
+
+        @keyframes neonPulse {
+            from { text-shadow: 0 0 5px var(--neon-green); }
+            to { text-shadow: 0 0 20px var(--neon-green),
+                          0 0 30px var(--neon-green); }
+        }
+
+        .hacker-nav {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .nav-link {
+            color: var(--neon-green);
+            text-decoration: none;
+            padding: 1rem;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+            
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 50%;
+            transition: 0.5s;
+        }
+
+        .nav-link:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .terminal {
+            background: #000;
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+            border: 1px solid var(--neon-green);
+        }
+
+        .terminal::before {
+            content: 'root@ne0n:~#';
+            position: absolute;
+            top: -0.8rem;
+            left: 1rem;
+            background: #000;
+            padding: 0 0.5rem;
+            color: var(--neon-green);
+        }
+
+        .matrix-text {
+            color: var(--matrix-green);
+            text-shadow: 0 0 5px var(--matrix-green);
+        }
+
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .skill-item {
+            padding: 1.5rem;
+            border: 1px solid var(--neon-blue);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(0, 136, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .skill-item:hover::before {
+            left: 100%;
+        }
+
+        .cyber-button {
+            background: none;
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .cyber-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(0, 255, 0, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .cyber-button:hover::before {
+            left: 100%;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 10%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: scan 3s linear infinite;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .glitch-container {
+            position: relative;
+            text-align: center;
+        }
+
+        .glitch-text {
+            position: relative;
+            font-size: 4rem;
+            animation: glitch 2s infinite;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00c1;
+            animation: glitch-top 1s linear infinite;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: 2px 0 #00fff9;
+            animation: glitch-bottom 1.5s linear infinite;
+        }
+
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px,0) skew(0deg); }
+            4%, 60% { transform: translate(-2px,0) skew(0deg); }
+            62% { transform: translate(0,0) skew(5deg); }
+        }
+
+        @keyframes glitch-top {
+            0%, 100% { clip-path: inset(10% 0 90% 0); }
+            50% { clip-path: inset(20% 0 70% 0); }
+        }
+
+        @keyframes glitch-bottom {
+            0%, 100% { clip-path: inset(90% 0 10% 0); }
+            50% { clip-path: inset(70% 0 20% 0); }
+        }
+        footer {
+            
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 20px;
+            border-top: 2px solid #00ff00;
+        }
+
+        footer p {
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrix"></canvas>
+    <div class="scanline"></div>
+
+    <div class="container">
+        <div class="glitch-container">
+            <h1 class="glitch-text" data-text="MrP4nTh3r">MrP4nTh3r</h1>
+        </div>
+
+        <nav class="hacker-nav">
+            <a href="#about" class="nav-link">[ About ]</a>
+            <a href="#skills" class="nav-link">[ Skills ]</a>
+            <a href="#work" class="nav-link">[ Work ]</a>
+            <a href="#contact" class="nav-link">[ Contact ]</a>
+        </nav>
+
+        <section id="about" class="cyber-box cyber-border">
+            <h2 class="matrix-text">> whois MrP4nTh3r</h2>
+            <div class="terminal">
+                <p class="matrix-text">[+] Initializing system protocols...</p>
+                <p class="matrix-text">[+] Accessing darknet interfaces...</p>
+                <p class="matrix-text">[!] WARNING: Security clearance level 9 required</p>
+                <p class="matrix-text">> Cybersecurity Enthusiast | Ethical Hacker | SOC Analyst</p>
+                <p class="matrix-text">> Specializing in advanced persistent threat neutralization</p>
+            </div>
+        </section>
+
+        <section id="skills" class="cyber-box cyber-border">
+            <h2 class="matrix-text">> load_cyber_skills_&_tools.exe</h2>
+            <div class="skill-grid">
+                <div class="skill-item matrix-text">Cybersecurity: Ethical Hacking, Linux, Penetration Testing</div>
+                <div class="skill-item matrix-text">Programming: Python, PHP, Bash</div>
+                <div class="skill-item matrix-text">Tools: Nmap, Metasploit, Burp Suite, Dalfox, Nuclei</div>
+                <div class="skill-item matrix-text">Web Development: HTML, CSS, JavaScript</div>
+                
+            </div>
+        </section>
+
+        <section id="work" class="cyber-box cyber-border">
+            <h2 class="matrix-text">> recent_operations.log</h2>
+            <div class="terminal">
+                <p class="matrix-text"> Cyber Security Internship at Infotact</p>
+                <p class="matrix-text"> BscIt Graduate with a strong foundation in information technology and cybersecurity principles"</p>
+                <p class="matrix-text"> VAPT Intern at Synclature</p>
+                <p class="matrix-text"> </p>
+            </div>
+        </section>
+
+        <section id="contact" class="cyber-box cyber-border">
+            <h2 class="matrix-text">> secure_contact_form</h2>
+            <div class="terminal">
+                <form id="cyberForm">
+                    <input type="email" placeholder="[INPUT EMAIL]" class="matrix-text cyber-input"
+                           pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" required>
+                    <textarea placeholder="[ENCRYPTED MESSAGE]" class="matrix-text cyber-input" required></textarea>
+                    <button type="submit" class="cyber-button">[ INITIATE TRANSMISSION ]</button>
+                </form>
+            </div>
+        </section>
+        <div style="display: flex; justify-content: center;" width="100%">  
+            <div class="social-links">
+                <a href="https://github.com/MrPanther0/" class="nav-link"><i class="fab fa-github"></i> GitHub</a>
+                <a href="https://tryhackme.com/r/p/MrPanther" class="nav-link"><i class="fab fa-hacker-news"></i> TryHackMe</a>
+                <a href="https://www.linkedin.com/in/saurav-prajapati-6a0539234" class="nav-link"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+            </div>    
+        </div>
+    </div>
+
+    <script>
+        // Matrix background effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+        const fontSize = 14;
+        const columns = canvas.width/fontSize;
+        const drops = [];
+
+        for(let x = 0; x < columns; x++) drops[x] = 1;
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+                
+                if(drops[i]*fontSize > canvas.height && Math.random() > 0.975)
+                    drops[i] = 0;
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 50);
+
+        // Interactive terminal commands
+        document.querySelectorAll('.terminal').forEach(terminal => {
+            terminal.addEventListener('click', () => {
+                terminal.classList.toggle('active');
+                terminal.style.transform = `rotateX(${terminal.classList.contains('active') ? '10deg' : '0'})`;
+            });
+        });
+
+        // Form validation
+        document.getElementById('cyberForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputs = document.querySelectorAll('.cyber-input');
+            let valid = true;
+            
+            inputs.forEach(input => {
+                if(!input.checkValidity()) {
+                    input.style.borderColor = '#f00';
+                    valid = false;
+                } else {
+                    input.style.borderColor = '#0f0';
+                }
+            });
+
+            if(valid) {
+                alert('[ MESSAGE ENCRYPTED AND SENT ]');
+                document.getElementById('cyberForm').reset();
+            }
+        });
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        document.querySelectorAll('.cyber-box').forEach(box => {
+            box.style.opacity = 0;
+            box.style.transform = 'translateY(150px)';
+            box.style.transition = 'all 0.8s ease-out';
+            observer.observe(box);
+        });
+
+        // Audio effects
+        document.addEventListener('click', () => {
+            const clickSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU');
+            clickSound.play().catch(() => {});
+        });
+    </script>
+<footer>
+    <p>© 2025 Saurav Prajapati. All rights reserved.</p>
+</footer>
+</body>
+</html>
