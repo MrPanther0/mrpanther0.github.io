@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Expense Tracker · ₹ · daily weekly monthly yearly</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Font Awesome 6 (free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* MATERIAL / ANDROID INSPIRED — CLEAN, ROUNDED, DYNAMIC */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #f2f5f9;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+            align-items: flex-start;
+        }
+
+        /* main app card — like android bottom sheets + cards */
+        .android-container {
+            max-width: 480px;
+            width: 100%;
+            margin: 8px auto;
+            background: #ffffff;
+            border-radius: 36px 36px 28px 28px;
+            box-shadow: 0 20px 40px rgba(0, 20, 40, 0.12), 0 8px 18px rgba(0,0,0,0.05);
+            overflow: hidden;
+            padding: 22px 18px 26px 18px;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        /* auth card / dashboard sections toggle */
+        .section {
+            transition: opacity 0.2s;
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* === AUTH (ANDROID LOGIN CARD) === */
+        .auth-card {
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 28px 20px;
+            width: 100%;
+        }
+
+        .brand-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .brand-icon {
+            background: #1e2f40;
+            width: 52px;
+            height: 52px;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 26px;
+        }
+        .brand-row h1 {
+            font-size: 1.9rem;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            color: #09121c;
+        }
+
+        .android-tabs {
+            display: flex;
+            gap: 8px;
+            background: #eef2f7;
+            padding: 6px;
+            border-radius: 40px;
+            margin-bottom: 28px;
+        }
+        .and-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px 8px;
+            border-radius: 34px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #3c4e64;
+            transition: 0.15s;
+            cursor: pointer;
+        }
+        .and-tab.active {
+            background: white;
+            color: #102331;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 22px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #4f627b;
+            margin-bottom: 6px;
+            margin-left: 8px;
+            letter-spacing: 0.2px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 16px 20px;
+            background: #f2f6fc;
+            border: 1.5px solid transparent;
+            border-radius: 28px;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
+        .input-field:focus {
+            border-color: #1e2f40;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(23,55,90,0.1);
+        }
+
+        .btn-android {
+            background: #1e2f40;
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: 0 8px 18px rgba(19,47,80,0.2);
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-android:active { transform: scale(0.98); background: #0f1b2a; }
+
+        .auth-message {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.95rem;
+            color: #146c5a;
+        }
+        .error-message { color: #b3261e; }
+
+        /* === DASHBOARD (ANDROID STYLE) === */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 0 6px;
+        }
+        .greeting {
+            font-size: 1.7rem;
+            font-weight: 500;
+            color: #101f2e;
+        }
+        .greeting span { color: #1e2f40; font-weight: 600; }
+        .logout-btn {
+            background: transparent;
+            border: 1.5px solid #cbd6e6;
+            border-radius: 40px;
+            padding: 12px 18px;
+            font-size: 1rem;
+            color: #2c4058;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .logout-btn:active { background: #eef3fc; }
+
+        /* quick add expense card */
+        .add-expense-card {
+            background: #f7faff;
+            border-radius: 36px;
+            padding: 22px 18px;
+            margin-bottom: 28px;
+            box-shadow: inset 0 1px 4px #ffffff, 0 8px 14px rgba(0,20,40,0.08);
+            border: 1px solid rgba(255,255,255,0.9);
+        }
+        .add-flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        .and-field {
+            flex: 1 1 140px;
+        }
+        .and-field label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #4f6688;
+            margin-left: 10px;
+        }
+        .and-field input, .and-field select {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 30px;
+            border: 1.5px solid #e3ebf5;
+            background: white;
+            font-size: 0.95rem;
+        }
+        .btn-add {
+            background: #1e2f40;
+            border: none;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 6px 12px #1e2f4030;
+            margin-left: auto;
+        }
+
+        /* time filter — daily, weekly, monthly, yearly */
+        .period-filter {
+            display: flex;
+            flex-wrap: wrap;
+            background: #ecf2fa;
+            padding: 6px;
+            border-radius: 46px;
+            margin-bottom: 28px;
+            gap: 4px;
+        }
+        .period-btn {
+            flex: 1 0 70px;
+            background: transparent;
+            border: none;
+            padding: 12px 6px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2b405b;
+            cursor: pointer;
+            transition: 0.1s;
+            white-space: nowrap;
+        }
+        .period-btn.active {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            color: #0d263b;
+        }
+
+        /* insights row (total for period) */
+        .period-total {
+            background: #eef3fc;
+            border-radius: 30px;
+            padding: 16px 22px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .total-label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #364b66;
+        }
+        .total-value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1e2f40;
+            letter-spacing: -0.5px;
+        }
+
+        /* two column grid: list & chart */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        @media (min-width: 400px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .list-card, .chart-card {
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 18px 14px;
+            box-shadow: 0 8px 22px rgba(0,20,40,0.08);
+            border: 1px solid rgba(240,245,255,0.9);
+        }
+        .list-card h2, .chart-card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #1a2d40;
+        }
+
+        .expense-scroll {
+            max-height: 260px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 6px;
+            border-bottom: 1px solid #edf2fa;
+        }
+        .expense-left {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+        .expense-cat {
+            background: #deecff;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #1f4172;
+        }
+        .expense-desc {
+            font-weight: 500;
+            color: #1d2b3c;
+        }
+        .expense-amt {
+            font-weight: 700;
+            background: #e8f0fe;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #98a9c2;
+            padding: 8px 10px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        .delete-btn:active { background: #f0d7d7; color: #c33; }
+
+        .chart-container {
+            height: 200px;
+            width: 100%;
+            position: relative;
+        }
+        .no-chart-msg {
+            text-align: center;
+            color: #8a9bb0;
+            padding: 40px 0;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+<div class="android-container">
+    <!-- AUTH SECTION -->
+    <div id="authSection" class="section">
+        <div class="auth-card">
+            <div class="brand-row">
+                <div class="brand-icon"><i class="fas fa-wallet"></i></div>
+                <h1>expense·k</h1>
+            </div>
+            <div class="android-tabs" id="authTabs">
+                <button class="and-tab active" id="loginTabBtn" onclick="switchTab('login')">Log in</button>
+                <button class="and-tab" id="signupTabBtn" onclick="switchTab('signup')">Sign up</button>
+            </div>
+
+            <!-- login -->
+            <div id="loginForm">
+                <div class="input-group">
+                    <label><i class="far fa-user-circle"></i> Username</label>
+                    <input type="text" class="input-field" id="loginUsername" placeholder="e.g., alex">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" class="input-field" id="loginPassword" placeholder="••••••">
+                </div>
+                <button class="btn-android" onclick="handleLogin()">Sign in</button>
+                <div id="loginMessage" class="auth-message"></div>
+            </div>
+
+            <!-- signup (hidden) -->
+            <div id="signupForm" class="hidden">
+                <div class="input-group">
+                    <label><i class="far fa-user"></i> Username</label>
+                    <input type="text" class="input-field" id="signupUsername" placeholder="min 3 chars">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" class="input-field" id="signupPassword" placeholder="min 4 chars">
+                </div>
+                <button class="btn-android" onclick="handleSignup()">Create account</button>
+                <div id="signupMessage" class="auth-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboardSection" class="section hidden">
+        <!-- header -->
+        <div class="dashboard-header">
+            <div class="greeting">👋 <span id="displayUserName"></span></div>
+            <button class="logout-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> exit</button>
+        </div>
+
+        <!-- add expense (android style) with ₹ hint -->
+        <div class="add-expense-card">
+            <div class="add-flex">
+                <div class="and-field">
+                    <label>desc</label>
+                    <input type="text" id="expenseDesc" placeholder="Groceries...">
+                </div>
+                <div class="and-field">
+                    <label>₹ amount</label>
+                    <input type="number" id="expenseAmount" step="0.01" min="0.01" placeholder="0.00">
+                </div>
+                <div class="and-field">
+                    <label>category</label>
+                    <select id="expenseCategory">
+                        <option value="Food">Food</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Entertainment">Entertain</option>
+                        <option value="Bills">Bills</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button class="btn-add" onclick="addExpense()"><i class="fas fa-plus-circle"></i> Add</button>
+            </div>
+        </div>
+
+        <!-- DAILY / WEEKLY / MONTHLY / YEARLY FILTER -->
+        <div class="period-filter" id="periodFilter">
+            <button class="period-btn active" data-period="daily" onclick="setPeriod('daily')">Daily</button>
+            <button class="period-btn" data-period="weekly" onclick="setPeriod('weekly')">Weekly</button>
+            <button class="period-btn" data-period="monthly" onclick="setPeriod('monthly')">Monthly</button>
+            <button class="period-btn" data-period="yearly" onclick="setPeriod('yearly')">Yearly</button>
+        </div>
+
+        <!-- period total dynamic with ₹ -->
+        <div class="period-total">
+            <span class="total-label" id="periodLabel">Daily total</span>
+            <span class="total-value" id="periodTotalAmount">₹0.00</span>
+        </div>
+
+        <!-- grid : expense list + chart -->
+        <div class="dashboard-grid">
+            <!-- left: filtered expenses -->
+            <div class="list-card">
+                <h2><i class="fas fa-clock"></i> Transactions</h2>
+                <div id="expenseListContainer" class="expense-scroll">
+                    <!-- dynamic -->
+                </div>
+            </div>
+            <!-- right: pie chart -->
+            <div class="chart-card">
+                <h2><i class="fas fa-chart-pie"></i> by category</h2>
+                <div class="chart-container">
+                    <canvas id="expensePieChart"></canvas>
+                </div>
+                <div id="piePlaceholder" class="no-chart-msg hidden">✨ add expenses</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- storage keys ----------
+        const USERS_KEY = 'exp_tracker_users_v2';
+        const SESSION_KEY = 'exp_tracker_session_v2';
+
+        // current period filter: 'daily', 'weekly', 'monthly', 'yearly'
+        let currentPeriod = 'daily';  // default
+
+        // Chart instance
+        let pieChart = null;
+
+        // ---------- helpers ----------
+        function getUsers() {
+            return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+        }
+        function saveUsers(users) {
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+        function getSession() {
+            return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; // { username, expenses }
+        }
+        function setSession(username, expenses) {
+            localStorage.setItem(SESSION_KEY, JSON.stringify({ username, expenses }));
+        }
+        function clearSession() {
+            localStorage.removeItem(SESSION_KEY);
+        }
+
+        // update both user storage and session
+        function updateUserExpenses(username, expenses) {
+            const users = getUsers();
+            const idx = users.findIndex(u => u.username === username);
+            if (idx !== -1) {
+                users[idx].expenses = expenses;
+                saveUsers(users);
+            }
+            // refresh session
+            setSession(username, expenses);
+        }
+
+        // ---------- date utils ----------
+        function getExpenseDate(exp) {
+            return exp.date ? new Date(exp.date) : new Date(); // fallback (old expenses may lack date)
+        }
+
+        // filter expenses based on period + current day
+        function filterExpensesByPeriod(expenses, period) {
+            if (!expenses || expenses.length === 0) return [];
+
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            return expenses.filter(exp => {
+                if (!exp.date) return false; // ignore really old ones without date (but we'll save date from now on)
+                const expDate = new Date(exp.date);
+                const expDateOnly = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate());
+
+                if (period === 'daily') {
+                    return expDateOnly.getTime() === today.getTime();
+                }
+                else if (period === 'weekly') {
+                    // get start of week (Monday)
+                    const dayOfWeek = today.getDay(); // 0 sun, 1 mon ... 6 sat
+                    const mondayOffset = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek); // if sun, go back 6 days to mon
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() + mondayOffset);
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
+
+                    return expDateOnly >= weekStart && expDateOnly <= weekEnd;
+                }
+                else if (period === 'monthly') {
+                    return expDateOnly.getMonth() === today.getMonth() && expDateOnly.getFullYear() === today.getFullYear();
+                }
+                else if (period === 'yearly') {
+                    return expDateOnly.getFullYear() === today.getFullYear();
+                }
+                return false;
+            });
+        }
+
+        // sum amounts
+        function sumAmounts(expenses) {
+            return expenses.reduce((acc, e) => acc + e.amount, 0);
+        }
+
+        // ---------- render dashboard with period filter ----------
+        function refreshDashboard() {
+            const session = getSession();
+            if (!session) return;
+
+            const username = session.username;
+            document.getElementById('displayUserName').innerText = username;
+
+            let allExpenses = session.expenses || [];
+
+            // filter by current period
+            const filtered = filterExpensesByPeriod(allExpenses, currentPeriod);
+            const total = sumAmounts(filtered);
+
+            // update period label & total with ₹
+            const periodLabels = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly' };
+            document.getElementById('periodLabel').innerText = periodLabels[currentPeriod] + ' total';
+            document.getElementById('periodTotalAmount').innerText = `₹${total.toFixed(2)}`;
+
+            // render expense list (with ₹)
+            const listDiv = document.getElementById('expenseListContainer');
+            if (filtered.length === 0) {
+                listDiv.innerHTML = `<div style="text-align:center; padding:24px 0; color:#758aa5;"><i class="far fa-frown"></i> No expenses this ${currentPeriod}</div>`;
+            } else {
+                let html = '';
+                filtered.forEach((exp, idx) => {
+                    const expId = exp.id; // we will store timestamp as id
+                    html += `
+                        <div class="expense-item">
+                            <div class="expense-left">
+                                <span class="expense-cat">${exp.category}</span>
+                                <span class="expense-desc">${escapeHtml(exp.description)}</span>
+                                <span class="expense-amt">₹${exp.amount.toFixed(2)}</span>
+                            </div>
+                            <button class="delete-btn" onclick="deleteExpense('${expId}')" title="delete"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    `;
+                });
+                listDiv.innerHTML = html;
+            }
+
+            // update pie chart (based on filtered expenses)
+            updateChart(filtered);
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/[&<>"]/g, function(m) {
+                if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; if(m === '"') return '&quot;';
+                return m;
+            });
+        }
+
+        // update chart using filtered expenses
+        function updateChart(expensesFiltered) {
+            const ctx = document.getElementById('expensePieChart').getContext('2d');
+            const placeholder = document.getElementById('piePlaceholder');
+
+            if (pieChart) { pieChart.destroy(); pieChart = null; }
+
+            if (!expensesFiltered || expensesFiltered.length === 0) {
+                placeholder.classList.remove('hidden');
+                return;
+            }
+            placeholder.classList.add('hidden');
+
+            // aggregate category
+            const catMap = new Map();
+            expensesFiltered.forEach(e => catMap.set(e.category, (catMap.get(e.category) || 0) + e.amount));
+
+            const categories = Array.from(catMap.keys());
+            const amounts = Array.from(catMap.values());
+            const colors = ['#3f72af', '#db7655', '#44997b', '#b6577a', '#b58a4a', '#607a9e', '#b56464'];
+
+            pieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: amounts,
+                        backgroundColor: colors.slice(0, categories.length),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }
+                }
+            });
+        }
+
+        // ---------- add expense (with date = now) ----------
+        window.addExpense = function() {
+            const session = getSession();
+            if (!session) return;
+
+            const desc = document.getElementById('expenseDesc').value.trim();
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const category = document.getElementById('expenseCategory').value;
+
+            if (!desc) return alert('Enter description');
+            if (isNaN(amount) || amount <= 0) return alert('Valid amount required');
+
+            // create new expense object with id and current date
+            const newExp = {
+                id: Date.now() + '-' + Math.random().toString(36).substr(2, 6),  // unique
+                description: desc,
+                amount: amount,
+                category: category,
+                date: new Date().toISOString()  // store ISO
+            };
+
+            const updated = [...(session.expenses || []), newExp];
+            updateUserExpenses(session.username, updated);
+            document.getElementById('expenseDesc').value = '';
+            document.getElementById('expenseAmount').value = '';
+
+            refreshDashboard();
+        };
+
+        // delete expense by id (search in all expenses)
+        window.deleteExpense = function(id) {
+            const session = getSession();
+            if (!session) return;
+            const current = session.expenses || [];
+            const updated = current.filter(exp => exp.id != id);  // loose compare ok
+            updateUserExpenses(session.username, updated);
+            refreshDashboard();
+        };
+
+        // period switcher
+        window.setPeriod = function(period) {
+            currentPeriod = period;
+            // update active class on buttons
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                const p = btn.getAttribute('data-period');
+                if (p === period) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            refreshDashboard();
+        };
+
+        // ---------- auth ----------
+        window.switchTab = function(tab) {
+            const loginTab = document.getElementById('loginTabBtn');
+            const signupTab = document.getElementById('signupTabBtn');
+            const loginDiv = document.getElementById('loginForm');
+            const signupDiv = document.getElementById('signupForm');
+
+            if (tab === 'login') {
+                loginTab.classList.add('active'); signupTab.classList.remove('active');
+                loginDiv.classList.remove('hidden'); signupDiv.classList.add('hidden');
+                document.getElementById('loginMessage').innerHTML = '';
+            } else {
+                signupTab.classList.add('active'); loginTab.classList.remove('active');
+                signupDiv.classList.remove('hidden'); loginDiv.classList.add('hidden');
+                document.getElementById('signupMessage').innerHTML = '';
+            }
+        };
+
+        window.handleSignup = function() {
+            const username = document.getElementById('signupUsername').value.trim();
+            const password = document.getElementById('signupPassword').value.trim();
+            const msg = document.getElementById('signupMessage');
+
+            if (username.length < 3) return msg.innerHTML = '<span class="error-message">❌ min 3 chars</span>';
+            if (password.length < 4) return msg.innerHTML = '<span class="error-message">❌ min 4 chars</span>';
+
+            const users = getUsers();
+            if (users.find(u => u.username === username)) {
+                return msg.innerHTML = '<span class="error-message">⚠️ user exists</span>';
+            }
+            users.push({ username, password, expenses: [] });
+            saveUsers(users);
+            msg.innerHTML = '✅ created! switch to login.';
+            document.getElementById('signupUsername').value = '';
+            document.getElementById('signupPassword').value = '';
+            setTimeout(() => switchTab('login'), 1000);
+        };
+
+        window.handleLogin = function() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const msg = document.getElementById('loginMessage');
+
+            const users = getUsers();
+            const user = users.find(u => u.username === username && u.password === password);
+            if (!user) return msg.innerHTML = '<span class="error-message">🔒 invalid</span>';
+
+            setSession(user.username, user.expenses || []);
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            refreshDashboard();
+
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            msg.innerHTML = '';
+        };
+
+        window.handleLogout = function() {
+            clearSession();
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('authSection').classList.remove('hidden');
+            switchTab('login');
+            if (pieChart) { pieChart.destroy(); pieChart = null; }
+        };
+
+        // on load, check session
+        function init() {
+            const session = getSession();
+            if (session && session.username) {
+                const users = getUsers();
+                const user = users.find(u => u.username === session.username);
+                if (user) {
+                    setSession(user.username, user.expenses || []); // sync
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('dashboardSection').classList.remove('hidden');
+                    refreshDashboard();
+                } else {
+                    clearSession();
+                }
+            } else {
+                switchTab('login');
+            }
+            // set default period active
+            setPeriod('daily');
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
