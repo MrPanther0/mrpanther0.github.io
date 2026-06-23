@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BHOS — Bug Hunting Operating System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0D12;
+  --bg-soft:#0D1117;
+  --surface:#12161D;
+  --surface-2:#161B24;
+  --surface-3:#1C222C;
+  --border:#232A36;
+  --border-strong:#313A48;
+  --text:#E7ECF3;
+  --text-dim:#92A0B5;
+  --text-faint:#5B6577;
+  --accent:#45F2A6;
+  --accent-strong:#1FCB86;
+  --accent-dim:rgba(69,242,166,.12);
+  --accent-border:rgba(69,242,166,.35);
+  --danger:#FF6B82;
+  --danger-dim:rgba(255,107,130,.12);
+  --warning:#FFB454;
+  --warning-dim:rgba(255,180,84,.12);
+  --info:#5FA8FF;
+  --info-dim:rgba(95,168,255,.12);
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --sans:'IBM Plex Sans',-apple-system,'Segoe UI',Roboto,sans-serif;
+  --radius:12px;
+  --radius-sm:8px;
+  --shadow:0 12px 32px rgba(0,0,0,.45);
+  --sidebar-w:264px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  background-image:
+    linear-gradient(180deg, rgba(69,242,166,.04), transparent 280px),
+    radial-gradient(ellipse 900px 500px at 100% -10%, rgba(95,168,255,.06), transparent);
+  background-attachment:fixed;
+}
+h1,h2,h3,h4{font-family:var(--sans);font-weight:600;margin:0 0 8px;color:var(--text);letter-spacing:-.01em;}
+p{margin:0 0 10px;color:var(--text-dim);}
+a{color:var(--accent);text-decoration:none;}
+code,.mono{font-family:var(--mono);}
+::selection{background:var(--accent-dim);color:var(--text);}
+*:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important;}}
+
+/* scrollbar */
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:8px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text-faint);}
+
+/* ===== Boot sequence ===== */
+.boot{
+  position:fixed;inset:0;background:var(--bg);color:var(--accent);
+  font-family:var(--mono);display:flex;align-items:center;justify-content:center;
+  z-index:999;cursor:pointer;
+}
+.boot-box{width:min(640px,86vw);}
+.boot-line{font-size:14px;white-space:pre-wrap;color:var(--text-dim);margin-bottom:6px;opacity:0;animation:fadeIn .25s forwards;}
+.boot-line b{color:var(--accent);font-weight:600;}
+.boot-cursor{display:inline-block;width:8px;height:16px;background:var(--accent);margin-left:6px;vertical-align:-2px;animation:blink 1s steps(2) infinite;}
+.boot-skip{margin-top:18px;font-size:12px;color:var(--text-faint);}
+@keyframes fadeIn{to{opacity:1;}}
+@keyframes blink{50%{opacity:0;}}
+
+/* ===== Layout ===== */
+.app{display:flex;min-height:100vh;}
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:40;
+  transition:transform .25s ease;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:20px 18px 16px;border-bottom:1px solid var(--border);}
+.brand-mark{
+  width:34px;height:34px;border-radius:8px;background:var(--accent-dim);border:1px solid var(--accent-border);
+  display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;
+}
+.brand-text .name{font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:.03em;color:var(--text);}
+.brand-text .sub{font-size:11px;color:var(--text-faint);font-family:var(--mono);}
+.nav{flex:1;overflow-y:auto;padding:14px 10px;}
+.nav-section-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);padding:14px 10px 6px;font-weight:600;}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--radius-sm);
+  color:var(--text-dim);font-size:14px;font-weight:500;cursor:pointer;margin-bottom:2px;
+  border:1px solid transparent;min-height:44px;
+}
+.nav-item svg{flex-shrink:0;opacity:.85;}
+.nav-item:hover{background:var(--surface-2);color:var(--text);}
+.nav-item.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent-border);}
+.nav-item.active svg{opacity:1;}
+.nav-badge{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-faint);background:var(--surface-3);padding:2px 7px;border-radius:20px;}
+.sidebar-footer{padding:14px;border-top:1px solid var(--border);}
+.status-pill{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--text-faint);padding:8px 10px;border:1px solid var(--border);border-radius:20px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+.main{margin-left:var(--sidebar-w);flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{
+  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;
+  padding:16px 28px;background:rgba(10,13,18,.85);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);min-height:64px;
+}
+.nav-toggle{display:none;background:var(--surface-2);border:1px solid var(--border);color:var(--text);width:40px;height:40px;border-radius:var(--radius-sm);align-items:center;justify-content:center;cursor:pointer;}
+.crumb{font-size:13px;color:var(--text-faint);font-family:var(--mono);}
+.crumb b{color:var(--text);font-weight:600;}
+.topbar-spacer{flex:1;}
+.global-progress{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--text-dim);}
+.ring{width:30px;height:30px;}
+.content{padding:28px 28px 64px;max-width:1180px;width:100%;}
+
+/* ===== Generic components ===== */
+.page-head{margin-bottom:22px;}
+.eyebrow{font-family:var(--mono);font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;display:block;}
+.page-head h1{font-size:26px;}
+.page-head .lede{color:var(--text-dim);max-width:760px;font-size:15px;}
+
+.callout{display:flex;gap:12px;padding:14px 16px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);margin-bottom:22px;}
+.callout.warn{border-color:rgba(255,180,84,.35);background:var(--warning-dim);}
+.callout.danger{border-color:rgba(255,107,130,.35);background:var(--danger-dim);}
+.callout svg{flex-shrink:0;margin-top:1px;}
+.callout.warn svg{color:var(--warning);}
+.callout.danger svg{color:var(--danger);}
+.callout p{margin:0;font-size:13.5px;color:var(--text);}
+.callout p b{color:var(--text);}
+.callout strong.label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--warning);margin-bottom:3px;font-family:var(--mono);}
+.callout.danger strong.label{color:var(--danger);}
+
+.grid{display:grid;gap:16px;}
+.grid.cols-2{grid-template-columns:repeat(2,1fr);}
+.grid.cols-3{grid-template-columns:repeat(3,1fr);}
+.grid.cols-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:980px){.grid.cols-2,.grid.cols-3,.grid.cols-4{grid-template-columns:1fr 1fr;}}
+@media (max-width:680px){.grid.cols-2,.grid.cols-3,.grid.cols-4{grid-template-columns:1fr;}}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.card.clickable{cursor:pointer;transition:border-color .15s, transform .15s;}
+.card.clickable:hover{border-color:var(--border-strong);transform:translateY(-1px);}
+.card.selected{border-color:var(--accent);background:var(--accent-dim);}
+.stat{display:flex;flex-direction:column;gap:4px;}
+.stat .num{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--accent);}
+.stat .lbl{font-size:12.5px;color:var(--text-faint);}
+
+.progress-track{height:8px;background:var(--surface-3);border-radius:20px;overflow:hidden;border:1px solid var(--border);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-strong),var(--accent));border-radius:20px;transition:width .3s ease;}
+.progress-row{display:flex;align-items:center;gap:10px;}
+.progress-row .progress-track{flex:1;}
+.progress-row .pct{font-family:var(--mono);font-size:12px;color:var(--text-dim);min-width:34px;text-align:right;}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-weight:600;font-size:13.5px;
+  padding:10px 16px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--surface-2);
+  color:var(--text);cursor:pointer;min-height:40px;transition:background .15s,border-color .15s;
+}
+.btn:hover{background:var(--surface-3);}
+.btn.primary{background:var(--accent);color:#06150F;border-color:var(--accent);}
+.btn.primary:hover{background:var(--accent-strong);}
+.btn.ghost{background:transparent;}
+.btn.danger-outline{border-color:rgba(255,107,130,.4);color:var(--danger);background:transparent;}
+.btn.danger-outline:hover{background:var(--danger-dim);}
+.btn.sm{padding:7px 11px;font-size:12.5px;min-height:32px;}
+.btn svg{flex-shrink:0;}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;border:1px solid transparent;}
+.badge.critical{background:var(--danger-dim);color:var(--danger);border-color:rgba(255,107,130,.3);}
+.badge.high{background:var(--warning-dim);color:var(--warning);border-color:rgba(255,180,84,.3);}
+.badge.medium{background:var(--info-dim);color:var(--info);border-color:rgba(95,168,255,.3);}
+.badge.low{background:var(--surface-3);color:var(--text-dim);border-color:var(--border-strong);}
+.badge.neutral{background:var(--surface-3);color:var(--text-dim);}
+
+input[type=text],select,textarea{
+  width:100%;background:var(--surface-2);border:1px solid var(--border-strong);color:var(--text);
+  font-family:var(--sans);font-size:14px;padding:11px 13px;border-radius:var(--radius-sm);min-height:44px;
+}
+textarea{min-height:80px;resize:vertical;font-family:var(--mono);font-size:13px;}
+label.field-label{display:block;font-size:12.5px;font-weight:600;color:var(--text-dim);margin-bottom:6px;}
+.field{margin-bottom:16px;}
+
+/* details/accordion */
+details.acc{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);margin-bottom:12px;overflow:hidden;}
+details.acc[open]{border-color:var(--border-strong);}
+details.acc>summary{
+  list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;gap:12px;
+  font-weight:600;font-size:14.5px;color:var(--text);min-height:44px;
+}
+details.acc>summary::-webkit-details-marker{display:none;}
+details.acc>summary .chev{margin-left:auto;color:var(--text-faint);transition:transform .2s;flex-shrink:0;}
+details.acc[open]>summary .chev{transform:rotate(90deg);}
+details.acc .acc-body{padding:0 18px 18px;border-top:1px solid var(--border);padding-top:14px;}
+.tag-step{font-family:var(--mono);font-size:12px;color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:6px;padding:3px 8px;flex-shrink:0;}
+
+.subhead{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);font-weight:700;margin:18px 0 8px;font-family:var(--mono);}
+.subhead:first-child{margin-top:0;}
+
+.codeblock{
+  position:relative;background:#080A0E;border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px 44px 12px 14px;margin-bottom:8px;
+}
+.codeblock pre{margin:0;font-family:var(--mono);font-size:12.8px;color:#A7F3D0;white-space:pre-wrap;word-break:break-word;}
+.codeblock .tool-name{display:block;font-family:var(--sans);font-size:11.5px;color:var(--text-faint);margin-bottom:4px;}
+.copy-btn{position:absolute;top:10px;right:10px;background:var(--surface-2);border:1px solid var(--border-strong);color:var(--text-dim);width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.copy-btn:hover{color:var(--accent);border-color:var(--accent-border);}
+.copy-btn.copied{color:var(--accent);}
+
+ul.manual-list{margin:0;padding-left:18px;color:var(--text-dim);font-size:13.8px;}
+ul.manual-list li{margin-bottom:5px;}
+
+/* checklist items */
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:11px 4px;border-bottom:1px solid var(--border);}
+.check-item:last-child{border-bottom:none;}
+.check-item input[type=checkbox]{
+  appearance:none;width:20px;height:20px;border:1.5px solid var(--border-strong);border-radius:6px;
+  background:var(--surface-2);flex-shrink:0;margin-top:1px;cursor:pointer;position:relative;
+}
+.check-item input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent);}
+.check-item input[type=checkbox]:checked::after{
+  content:"";position:absolute;left:5px;top:1px;width:6px;height:11px;border:solid #06150F;border-width:0 2px 2px 0;transform:rotate(45deg);
+}
+.check-item .ci-text{flex:1;font-size:14px;color:var(--text);}
+.check-item.done .ci-text{color:var(--text-faint);text-decoration:line-through;}
+.check-item .ci-meta{display:block;margin-top:3px;font-size:12.5px;color:var(--text-faint);}
+.check-item code{background:var(--surface-3);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--accent);}
+
+/* target cards */
+.target-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;transition:border-color .15s;}
+.target-card:hover{border-color:var(--border-strong);}
+.target-card .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;}
+.target-card h3{font-size:15.5px;font-family:var(--mono);margin:0;word-break:break-word;}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-faint);}
+.empty-state svg{margin-bottom:14px;opacity:.6;}
+.empty-state h3{color:var(--text-dim);font-size:16px;}
+
+.type-pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-family:var(--mono);padding:4px 9px;border-radius:20px;background:var(--surface-3);color:var(--text-dim);border:1px solid var(--border-strong);}
+
+.section-title-row{display:flex;align-items:center;justify-content:space-between;margin:26px 0 12px;}
+.section-title-row h2{font-size:18px;margin:0;}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
+.search-wrap{position:relative;flex:1;min-width:200px;}
+.search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-faint);}
+.search-wrap input{padding-left:38px;}
+.chip{display:inline-flex;align-items:center;padding:7px 13px;border-radius:20px;border:1px solid var(--border-strong);background:var(--surface-2);font-size:12.5px;color:var(--text-dim);cursor:pointer;min-height:36px;font-weight:500;}
+.chip.active{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent);}
+
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text-dim);font-size:13px;margin-bottom:14px;cursor:pointer;font-weight:500;}
+.back-link:hover{color:var(--text);}
+
+footer.app-footer{padding:30px 28px;color:var(--text-faint);font-size:12.5px;border-top:1px solid var(--border);margin-top:20px;}
+
+@media (max-width:1024px){
+  .sidebar{transform:translateX(-100%);box-shadow:var(--shadow);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .nav-toggle{display:flex;}
+  .content{padding:20px 16px 50px;}
+  .topbar{padding:14px 16px;}
+  .global-progress span.gp-text{display:none;}
+}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:35;display:none;}
+.scrim.show{display:block;}
+</style>
+</head>
+<body>
+
+<div class="boot" id="boot">
+  <div class="boot-box">
+    <div class="boot-line" style="animation-delay:.05s">BHOS v1.0 — Bug Hunting Operating System</div>
+    <div class="boot-line" style="animation-delay:.25s">Loading methodology modules<b> [ OK ]</b></div>
+    <div class="boot-line" style="animation-delay:.45s">Loading vulnerability library<b> [ OK ]</b></div>
+    <div class="boot-line" style="animation-delay:.65s">Mounting target profiles<b> [ OK ]</b></div>
+    <div class="boot-line" style="animation-delay:.85s">Ready<span class="boot-cursor"></span></div>
+    <div class="boot-skip">click anywhere to continue</div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<div class="app" id="app" hidden>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark" id="iconBrand"></div>
+      <div class="brand-text">
+        <div class="name">BHOS</div>
+        <div class="sub">bug hunting OS · v1.0</div>
+      </div>
+    </div>
+    <nav class="nav" id="navList"></nav>
+    <div class="sidebar-footer">
+      <div class="status-pill"><span class="status-dot"></span> SYSTEM ACTIVE · AUTHORIZED SCOPE ONLY</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="nav-toggle" id="navToggle" aria-label="Open navigation menu"></button>
+      <div class="crumb" id="crumb">BHOS / Dashboard</div>
+      <div class="topbar-spacer"></div>
+      <div class="global-progress" id="globalProgress"></div>
+    </header>
+    <main class="content" id="content" tabindex="-1"></main>
+    <footer class="app-footer">BHOS is a personal methodology &amp; checklist tool. Only test assets you are explicitly authorized to test — a bug bounty program's defined scope, written permission, or your own lab. Your checklist data is stored locally to this tool and is not shared.</footer>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   BHOS — application script
+   ============================================================ */
+
+/* ---------- tiny utils ---------- */
+function escapeHtml(s){
+  if(s===undefined||s===null) return '';
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function slugify(s){ return String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,40) || 'target'; }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+/* ---------- icons (stroke-based, 1.5px, no emoji) ---------- */
+function ICON(name, size){
+  size = size || 18;
+  const s = `width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"`;
+  const paths = {
+    grid: `<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>`,
+    list: `<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2"/><path d="M4 12l1 1 2-2"/><path d="M4 18l1 1 2-2"/>`,
+    bug: `<circle cx="12" cy="13" r="6"/><path d="M9 9l-2-3M15 9l2-3M5 13H2M22 13h-3M8 19l-2 2M16 19l2 2M9 6h6"/>`,
+    target: `<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>`,
+    terminal: `<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/>`,
+    book: `<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20"/>`,
+    plus: `<path d="M12 5v14M5 12h14"/>`,
+    trash: `<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/>`,
+    copy: `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>`,
+    check: `<path d="M5 12l5 5 9-9"/>`,
+    search: `<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>`,
+    alertTriangle: `<path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17h.01"/>`,
+    alertOctagon: `<path d="M8 2h8l6 6v8l-6 6H8l-6-6V8l6-6Z"/><path d="M12 8v5M12 16h.01"/>`,
+    shield: `<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/>`,
+    external: `<path d="M14 4h6v6M20 4 10 14"/><path d="M19 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6"/>`,
+    x: `<path d="M5 5l14 14M19 5 5 19"/>`,
+    menu: `<path d="M4 7h16M4 12h16M4 17h16"/>`,
+    folder: `<path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7Z"/>`,
+    arrowLeft: `<path d="M19 12H5M11 18l-6-6 6-6"/>`,
+    clock: `<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>`,
+    chevron: `<path d="M9 18l6-6-6-6"/>`,
+    cart: `<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M3 4h2l2.4 12.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.78L20 8H6"/>`,
+    gov: `<path d="M3 21h18M5 21V10M19 21V10M3 10l9-6 9 6M9 21v-7M15 21v-7"/>`,
+    ai: `<rect x="5" y="6" width="14" height="12" rx="3"/><circle cx="9.5" cy="12" r="1.2" fill="currentColor"/><circle cx="14.5" cy="12" r="1.2" fill="currentColor"/><path d="M12 3v3M9 21v0M15 21v0"/>`,
+    layers: `<path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="M3 13l9 5 9-5M3 18l9 5 9-5"/>`,
+    bank: `<path d="M3 21h18M4 21V11M20 21V11M2 11l10-7 10 7M8 21v-6M12 21v-6M16 21v-6"/>`,
+    server: `<rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/>`,
+    note: `<path d="M5 3h11l3 3v15H5V3Z"/><path d="M16 3v3h3"/><path d="M8 11h8M8 15h8"/>`
+  };
+  return `<svg ${s}>${paths[name]||paths.note}</svg>`;
+}
+
+/* ---------- storage helpers (per-artifact persistent storage) ---------- */
+async function stGet(key){
+  try{ const r = await window.storage.get(key); return r ? r.value : null; }catch(e){ return null; }
+}
+async function stSet(key, value){
+  try{ return await window.storage.set(key, value); }catch(e){ console.error('storage set failed', e); return null; }
+}
+async function stDelete(key){
+  try{ return await window.storage.delete(key); }catch(e){ return null; }
+}
+
+/* ============================================================
+   DATA: METHODOLOGY PHASES
+   ============================================================ */
+const PHASES = [
+{ id:'p0', num:'00', title:'Scope, Authorization & Setup',
+  theory:`Before a single request leaves your machine, know exactly what you are allowed to touch. Read the bug bounty program's policy or the written authorization end-to-end: in-scope domains/IPs/apps, explicitly out-of-scope assets, disallowed techniques (DoS, social engineering, physical access), and reward/triage expectations. Set up a clean, isolated workspace: a dedicated browser profile or VM, Burp Suite/ZAP as your intercepting proxy, a VPN or VPS for a stable IP, and a single place to keep notes — this tool works well for that.`,
+  tools:[
+    {name:'Burp Suite Community/Pro — intercepting proxy', cmd:'burpsuite &  # configure 127.0.0.1:8080 as browser proxy, install CA cert'},
+    {name:'OWASP ZAP — free alternative proxy', cmd:'zap.sh -daemon -port 8090'},
+    {name:'tmux — keep long scans alive on a VPS', cmd:'tmux new -s bhos'},
+    {name:'FoxyProxy — quick proxy on/off toggle in browser', cmd:'# browser extension, no CLI'}
+  ],
+  checklist:[
+    'Read the full program policy / signed authorization, not just the scope table',
+    'List every in-scope domain, subdomain wildcard, IP range and mobile app',
+    'List every explicitly out-of-scope asset so you never touch it by accident',
+    'Note disallowed techniques (DoS, spam, physical, social engineering, automated scanning limits)',
+    'Set up an isolated browser profile / VM dedicated to this engagement',
+    'Configure Burp Suite or ZAP as your proxy and install its CA certificate',
+    'Set up a stable testing IP (VPN/VPS) and note it for your own records',
+    'Create a notes workspace (this tool, or Obsidian/Notion) before you start clicking'
+  ]
+},
+{ id:'p1', num:'01', title:'Passive Reconnaissance & OSINT',
+  theory:`Map the attack surface without sending a single request to the target's infrastructure yet. The goal is a list of subdomains, related domains, technologies, employee/dev footprints and leaked secrets, built entirely from public sources: certificate transparency logs, search engines, code hosting, Shodan/Censys, and historical crawl data. A wider passive net here means a much smaller blind spot later.`,
+  tools:[
+    {name:'subfinder — passive subdomain enumeration', cmd:'subfinder -d target.com -all -silent -o subs.txt'},
+    {name:'amass — passive OSINT graph', cmd:'amass enum -passive -d target.com -o amass.txt'},
+    {name:'assetfinder — quick related-domain sweep', cmd:'assetfinder --subs-only target.com >> subs.txt'},
+    {name:'crt.sh — certificate transparency', cmd:'curl -s "https://crt.sh/?q=%25.target.com&output=json" | jq -r ".[].name_value" | sort -u >> subs.txt'},
+    {name:'theHarvester — emails, hosts, employee footprint', cmd:'theHarvester -d target.com -b all -f harvester_out'},
+    {name:'gau / waybackurls — historical URLs from archives', cmd:'gau --subs target.com | tee wayback.txt; waybackurls target.com >> wayback.txt'},
+    {name:'GitHub code search — leaked keys/configs', cmd:'# search github.com/search?q=%22target.com%22+api_key  and check public org repos with gitleaks/trufflehog'}
+  ],
+  checklist:[
+    'Run subfinder, amass (passive), and assetfinder; merge and dedupe the subdomain list',
+    'Pull historical subdomains/hostnames from crt.sh certificate transparency logs',
+    'Run theHarvester for employee emails and related hosts (useful for phishing-adjacent and password-spray context only with authorization)',
+    'Pull historical URLs/parameters from gau + waybackurls — old endpoints often outlive their access controls',
+    'Google/Bing dork for exposed files: filetype:pdf, filetype:env, inurl:admin, inurl:login',
+    'Search GitHub/GitLab for the company name, API key patterns, and internal hostnames',
+    'Check Shodan/Censys for exposed services tied to the target\u2019s ASN/IP ranges',
+    'Note the apparent tech stack from job postings, docs pages, and public engineering blog posts'
+  ]
+},
+{ id:'p2', num:'02', title:'Active Recon, Mapping & Fingerprinting',
+  theory:`Now confirm what is actually alive, what it is running, and where its content lives. Resolve every passive subdomain to a live host, fingerprint technologies and versions, crawl the application to build a full URL/parameter map, and pull apart JavaScript bundles for hidden API endpoints. This phase turns a flat list of names into a real map of the attack surface you will test in Phase 3.`,
+  tools:[
+    {name:'httpx — probe live hosts + fingerprint', cmd:'httpx -l subs.txt -title -status-code -tech-detect -follow-redirects -o live.txt'},
+    {name:'naabu — fast port discovery on live hosts', cmd:'naabu -l live.txt -top-ports 1000 -o ports.txt'},
+    {name:'nmap — detailed service/version scan (only if program scope allows port scanning)', cmd:'nmap -sC -sV -p- -T4 -oA scan_target target.com'},
+    {name:'katana — JS-aware crawler', cmd:'katana -u https://target.com -d 3 -jc -kf all -o crawl.txt'},
+    {name:'ffuf — content/directory discovery', cmd:'ffuf -u https://target.com/FUZZ -w raft-medium-directories.txt -mc 200,301,302,403 -t 50 -o ffuf.json'},
+    {name:'gobuster — alternative directory brute force', cmd:'gobuster dir -u https://target.com -w common.txt -x php,asp,aspx,jsp,html -t 50'},
+    {name:'subjs + LinkFinder — pull endpoints out of JS bundles', cmd:'subjs -i live.txt | tee js.txt; python3 linkfinder.py -i js.txt -o cli'},
+    {name:'whatweb — quick tech fingerprint', cmd:'whatweb -a 3 target.com'}
+  ],
+  checklist:[
+    'Resolve every subdomain to live hosts with httpx; record title, status code, tech stack',
+    'Run naabu/nmap for open ports and exposed services (respect program rules on port scanning)',
+    'Crawl the app with katana or gospider to build a full URL + parameter inventory',
+    'Run content discovery (ffuf/gobuster) against each live host with a solid wordlist',
+    'Download every linked JS file and extract hidden API routes, keys, and comments',
+    'Check robots.txt, sitemap.xml, security.txt and any API docs (Swagger/OpenAPI/GraphQL playground)',
+    'Group discovered endpoints by function: auth, search, checkout/payment, admin, file handling, API/GraphQL',
+    'Flag any staging/dev/internal-looking hosts for extra attention — they are often less hardened'
+  ]
+},
+{ id:'p3', num:'03', title:'Vulnerability Discovery — Automated + Manual',
+  theory:`Run broad automated coverage first, then spend most of your time on manual logic-driven testing — automation catches known patterns, but unique business-logic and chained bugs are almost always found by a human reading the application's actual behaviour. Walk through the Vulnerability Library page for each relevant category against every endpoint you mapped in Phase 2, and use the Target Profiles page for the things specific to this kind of site.`,
+  tools:[
+    {name:'nuclei — template-based vulnerability scanning', cmd:'nuclei -l live.txt -t ~/nuclei-templates/ -severity medium,high,critical -o nuclei.txt'},
+    {name:'nuclei — exposures & misconfig templates', cmd:'nuclei -l live.txt -t exposures/ -t misconfiguration/ -o exposures.txt'},
+    {name:'nikto — general web server scan', cmd:'nikto -h https://target.com'},
+    {name:'testssl.sh — TLS/SSL configuration audit', cmd:'./testssl.sh https://target.com'},
+    {name:'arjun — hidden parameter discovery', cmd:'arjun -u https://target.com/endpoint -m GET,POST'},
+    {name:'Burp Suite — manual repeater/intruder testing', cmd:'# proxy traffic, then Repeater for single-request tampering, Intruder for payload sweeps'}
+  ],
+  checklist:[
+    'Run nuclei against all live hosts with the full community template set',
+    'Manually walk every input (params, headers, cookies, JSON bodies) through the relevant Vulnerability Library entries',
+    'Test every object reference (IDs, UUIDs, filenames) for IDOR / broken access control',
+    'Test every URL-accepting feature for SSRF (webhooks, import-by-URL, PDF/image generation)',
+    'Test every rendered input for XSS in its actual context (HTML body, attribute, JS string, URL)',
+    'Test authentication, session, and password-reset flows for logic flaws',
+    'Cross-check anything automated tools flagged manually before trusting it — confirm impact, not just a signature match',
+    'Open the matching Target Profile checklist for this site\u2019s category and work through it in parallel'
+  ]
+},
+{ id:'p4', num:'04', title:'Exploitation, Validation & Proof of Concept',
+  theory:`A finding only counts once you can prove its real impact with a minimal, controlled, non-destructive proof of concept. Use throwaway/test accounts wherever possible, never touch real user data beyond what is strictly needed to demonstrate impact, and avoid anything that could degrade the service (no mass exploitation, no automated brute force beyond a small proof, no deleting data). Chain smaller issues together when that genuinely raises impact (e.g. an open redirect that turns a CSRF into full account takeover).`,
+  tools:[
+    {name:'curl — minimal, reproducible PoC requests', cmd:'curl -i -X POST https://target.com/api/endpoint -H "Content-Type: application/json" -d \'{"id":1}\''},
+    {name:'Burp Repeater — manual step-by-step exploitation', cmd:'# right-click any captured request -> Send to Repeater, then tamper one field at a time'},
+    {name:'Python requests — scripted multi-step PoCs', cmd:'python3 -c "import requests; r=requests.get(\'https://target.com/api/x\'); print(r.status_code, r.text[:200])"'},
+    {name:'asciinema / OBS — record PoC evidence', cmd:'asciinema rec poc.cast'}
+  ],
+  checklist:[
+    'Reproduce the bug from a clean session/account at least twice before reporting',
+    'Build the smallest possible request/script that demonstrates the issue end-to-end',
+    'Use a test account or your own data — never a real victim\u2019s data beyond minimal proof',
+    'Capture clear evidence: request/response pairs, screenshots, or a short screen recording',
+    'Check whether this bug can be chained with another finding for materially higher impact',
+    'Confirm the issue is reproducible outside your own browser session/cache (e.g. incognito, curl)',
+    'Avoid anything destructive, irreversible, or that could affect other users or service availability'
+  ]
+},
+{ id:'p5', num:'05', title:'Reporting & Responsible Disclosure',
+  theory:`A great finding with a weak report gets triaged slowly or rejected; a clear report gets fixed fast. Write a precise title, exact numbered reproduction steps, the actual impact in business terms (not just "XSS found"), a CVSS score with its vector string, and a concrete remediation suggestion. Always follow the program's stated disclosure timeline and channel — never disclose publicly before the agreed window, and check Hacktivity/the program's duplicate history before submitting if that's available to you.`,
+  tools:[
+    {name:'CVSS calculator — first.org', cmd:'# open https://www.first.org/cvss/calculator/3.1 and fill in the vector manually'},
+    {name:'Burp\u2019s built-in PoC/CSRF generator', cmd:'# right-click request -> Engagement tools -> Generate CSRF PoC'},
+  ],
+  checklist:[
+    'Write a clear, specific title (asset + vulnerability class + key impact)',
+    'List exact, numbered reproduction steps a stranger could follow with no extra context',
+    'State the concrete business impact (data exposed, accounts affected, actions possible) — not just the bug class',
+    'Attach minimal evidence: request/response, screenshot, or short recording',
+    'Calculate a CVSS score and include the vector string',
+    'Suggest a remediation direction (not necessarily exact code, but the right fix category)',
+    'Check for likely duplicates before submitting if you have access to prior reports',
+    'Submit only through the program\u2019s designated channel and respect its disclosure timeline'
+  ]
+},
+{ id:'p6', num:'06', title:'Continuous Improvement & Playbook',
+  theory:`Bug hunting compounds. Keep a personal playbook of every recurring pattern you find — the wordlists that worked, the nuclei templates you wrote, the parameter names that tend to be vulnerable for a given stack. Read disclosed reports to learn techniques you haven't tried yet, and deliberately practice on labs so you're testing new payload classes against a real target, not a guess.`,
+  tools:[
+    {name:'PortSwigger Web Security Academy — free, hands-on labs', cmd:'# https://portswigger.net/web-security'},
+    {name:'HackerOne Hacktivity — read disclosed public reports', cmd:'# https://hackerone.com/hacktivity'},
+    {name:'SecLists — keep wordlists and payload lists current', cmd:'git clone https://github.com/danielmiessler/SecLists.git'}
+  ],
+  checklist:[
+    'After every engagement, write down what worked and what wasted time',
+    'Save useful payloads, wordlists, and nuclei templates into your own personal playbook',
+    'Read 2-3 disclosed reports a week for techniques outside your current habits',
+    'Practice a new vulnerability class on a lab (PortSwigger Academy, PentesterLab, HTB) before hunting it live',
+    'Revisit old targets periodically — apps change, and yesterday\u2019s dead end can be today\u2019s bug'
+  ]
+}
+];
+
+/* ============================================================
+   DATA: VULNERABILITY LIBRARY
+   ============================================================ */
+const VULNS = [
+{ id:'sqli', name:'SQL Injection', cat:'Injection', sev:'critical',
+  theory:'Untrusted input is concatenated into a SQL query instead of being parameterized, letting an attacker change the query\u2019s logic. Variants include error-based, blind boolean, blind time-based, UNION-based, and out-of-band.',
+  example:'A product page like /item?id=1 returns a DB error when you send id=1\' — confirming the value is dropped straight into the query. From there a UNION-based payload can pull data from other tables.',
+  tools:[
+    {name:'sqlmap — automated detection & extraction', cmd:'sqlmap -u "https://target.com/item?id=1" --batch --level=3 --risk=2 --dbs'},
+    {name:'sqlmap — through Burp request file', cmd:'sqlmap -r request.txt --batch --technique=BEUSTQ'}
+  ],
+  manual:['Try a single quote, then a boolean pair (id=1 AND 1=1 vs AND 1=2) and compare responses','Test every input vector, not just URL params: cookies, JSON body fields, and headers like X-Forwarded-For','Look for timing differences with SLEEP()-style payloads when no error or content difference appears','Try second-order injection: a value stored now and used unsafely in a query later']
+},
+{ id:'xss', name:'Cross-Site Scripting (XSS)', cat:'Injection', sev:'high',
+  theory:'Untrusted input is rendered in a page without proper output encoding, letting an attacker run JavaScript in another user\u2019s browser. Reflected (in the response to one request), stored (saved and shown to other users), and DOM-based (a client-side JS sink like innerHTML or eval using attacker-controlled data) are the three core types.',
+  example:'A search box reflects ?q= directly into the page\u2019s HTML; submitting a script-tag style payload executes immediately. For DOM XSS, check whether location.hash or a URL parameter flows into innerHTML or document.write.',
+  tools:[
+    {name:'dalfox — fast XSS scanning', cmd:'dalfox url "https://target.com/search?q=FUZZ"'},
+    {name:'dalfox — bulk scan a URL list', cmd:'dalfox file urls.txt -b your-collaborator-id'},
+    {name:'XSStrike — context-aware payload generation', cmd:'python3 xsstrike.py -u "https://target.com/search?q=test"'}
+  ],
+  manual:['Test every reflected parameter with context-aware payloads (HTML body, attribute, JS string, URL contexts differ)','Check the CSP header — a weak or missing CSP raises the impact of any XSS you find','Test stored fields: profile names, comments, reviews, file names, even image alt text','Test file upload for stored XSS via SVG files with embedded script content']
+},
+{ id:'idor', name:'IDOR / Broken Access Control', cat:'Access Control', sev:'critical',
+  theory:'The server returns or modifies an object referenced by an ID/parameter without properly verifying the requester is authorized to access that specific object. This is consistently one of the highest-yield bug classes because it requires no payload — just changing a number.',
+  example:'Changing order_id=1001 to order_id=1002 in an authenticated API call returns another customer\u2019s order details, even though you were never granted access to it.',
+  tools:[
+    {name:'Burp Autorize — automated access-control diffing', cmd:'# Burp extension: capture as low-priv user, replay as the other, diff responses automatically'},
+    {name:'ffuf — sweep numeric/UUID object IDs with a low-priv token', cmd:'ffuf -u "https://target.com/api/user/FUZZ" -w id_range.txt -H "Authorization: Bearer LOWPRIV_TOKEN" -mc 200'}
+  ],
+  manual:['Create two test accounts; swap session tokens/IDs between requests for the same object','Test GET (read) and state-changing PUT/PATCH/DELETE on the same object reference','Check mobile app and internal API endpoints separately — they are often less protected than the main web UI','Check GraphQL: object access controls are easy to miss per-field, not just per-query']
+},
+{ id:'ssrf', name:'Server-Side Request Forgery (SSRF)', cat:'Request Forgery', sev:'critical',
+  theory:'A server-side feature fetches a URL supplied by the user (webhooks, link previews, PDF/image generation, "import from URL") and the attacker can redirect that request to internal infrastructure, including cloud metadata endpoints.',
+  example:'A webhook URL field accepts http://169.254.169.254/latest/meta-data/ and the server happily fetches it server-side, potentially returning cloud credentials in the response.',
+  tools:[
+    {name:'interactsh-client — out-of-band callback confirmation', cmd:'interactsh-client   # then submit the generated URL as the target and watch for a callback'},
+    {name:'ssrfmap — automated SSRF exploitation helper', cmd:'python3 ssrfmap.py -r request.txt -p url -m readfiles'}
+  ],
+  manual:['Test any feature that accepts a URL: avatar-from-URL, webhooks, PDF export, import/sync features','Try internal IPs, cloud metadata addresses, and encoded variants (decimal/octal/hex IP, [::1])','If the response is not reflected, use an out-of-band domain to confirm a blind SSRF actually fired','Test DNS rebinding when a strict allow-list is in place but only validated once']
+},
+{ id:'csrf', name:'Cross-Site Request Forgery (CSRF)', cat:'Request Forgery', sev:'medium',
+  theory:'A state-changing action relies only on the victim\u2019s session cookie, with no check that the request actually originated from the app itself. A malicious page can auto-submit a forged request using the victim\u2019s authenticated browser.',
+  example:'A crafted external HTML page with an auto-submitting form changes the logged-in victim\u2019s account email the moment they open it, because the email-change endpoint never checked for a CSRF token.',
+  tools:[
+    {name:'Burp — generate a CSRF PoC', cmd:'# right-click the captured request -> Engagement tools -> Generate CSRF PoC'}
+  ],
+  manual:['Check that anti-CSRF tokens are actually validated server-side, not just present in the form','Test whether the same action also works via a GET request (no token needed at all)','Check the cookie\u2019s SameSite attribute — Lax/Strict materially reduces real-world exploitability','Re-test JSON-only endpoints; some frameworks block simple-form CSRF but not fetch-based variants']
+},
+{ id:'auth', name:'Authentication, Session & Token Flaws', cat:'Identity', sev:'critical',
+  theory:'Covers weak password reset/OTP logic, session fixation, and JWT/OAuth implementation mistakes — algorithm confusion, weak signing secrets, missing expiry checks, or loose redirect_uri validation in OAuth/SSO flows.',
+  example:'A JWT accepts alg=none or is signed with a short, guessable HMAC secret, letting an attacker forge a token claiming admin privileges without ever knowing the real secret.',
+  tools:[
+    {name:'jwt_tool — run the full JWT test suite', cmd:'python3 jwt_tool.py <token> -M at'},
+    {name:'jwt_tool — algorithm confusion / none-alg attack', cmd:'python3 jwt_tool.py <token> -X a'},
+    {name:'hydra — brute force a login form (only within program rate-limit allowances)', cmd:'hydra -l admin -P passlist.txt target.com http-post-form "/login:user=^USER^&pass=^PASS^:F=incorrect"'}
+  ],
+  manual:['Check password-reset token entropy, expiry, and whether it is invalidated after first use','Check OTP endpoints for missing rate limiting (can you brute force a 6-digit code?)','Confirm the session ID actually rotates on login and is invalidated on logout','For OAuth/SSO, check redirect_uri allow-list strictness and the presence/validation of the state parameter']
+},
+{ id:'upload', name:'File Upload Vulnerabilities', cat:'Input Handling', sev:'high',
+  theory:'Insufficient validation of an uploaded file\u2019s type, content, or destination path can allow a web shell, stored XSS (via SVG/HTML), or path traversal through a crafted filename.',
+  example:'An extension filter blocks .php but not .php.jpg or a null-byte trick; if the server still executes files under that path, this becomes remote code execution.',
+  tools:[
+    {name:'Burp Repeater — manipulate Content-Type/filename on a captured upload', cmd:'# intercept the multipart/form-data request, edit filename and Content-Type, resend'},
+    {name:'ffuf — fuzz allowed extensions against the upload endpoint', cmd:'ffuf -u https://target.com/upload -X POST -d "file=@payload.FUZZ" -w extensions.txt'}
+  ],
+  manual:['Try double extensions, null bytes, and case variation against extension filters','Upload an SVG with embedded <script> to test stored XSS via image rendering','Try ../ path traversal inside the filename field itself','Check whether uploaded files are ever served from the same origin/executable path']
+},
+{ id:'ssti', name:'Server-Side Template Injection (SSTI)', cat:'Injection', sev:'critical',
+  theory:'User input is embedded directly into a server-side template (Jinja2, Twig, FreeMarker, Velocity) and evaluated as code rather than treated as plain data, which can escalate to full remote code execution.',
+  example:'Submitting {{7*7}} into a name field and seeing 49 rendered back confirms Jinja2-style SSTI; from there, payloads can reach the underlying OS through the template engine\u2019s built-ins.',
+  tools:[
+    {name:'tplmap — automated SSTI detection & exploitation', cmd:'python3 tplmap.py -u "https://target.com/page?name=test"'}
+  ],
+  manual:['Try engine fingerprints in any field that ends up rendered or emailed: {{7*7}}, ${7*7}, #{7*7}, <%= 7*7 %>','Check PDF-generation and email-templating features specifically — they often template user input server-side','Escalate carefully and only as far as needed to prove impact, never beyond a minimal PoC']
+},
+{ id:'xxe', name:'XML External Entity (XXE)', cat:'Injection', sev:'high',
+  theory:'An XML parser processes externally defined entities supplied by the attacker, which can disclose local files, trigger SSRF, or cause denial of service (e.g. the "billion laughs" expansion attack).',
+  example:'A SOAP API or any endpoint accepting raw XML/DOCX/SVG/XLSX (all of which are ZIP-wrapped XML) processes a body containing an external entity referencing a local file path, and reflects its contents back.',
+  tools:[
+    {name:'Burp Repeater — manual crafted XXE payloads', cmd:'# send a body with a DOCTYPE defining an external entity, reference it in an element'},
+    {name:'XXEinjector — automated XXE exploitation', cmd:'ruby XXEinjector.rb --host=target.com --path=/api/xml --file=request.txt'}
+  ],
+  manual:['Test any endpoint accepting XML, plus file uploads of DOCX/XLSX/SVG which are XML under the hood','If direct file content is not reflected, use an out-of-band domain to confirm blind XXE','Check whether external DTDs are disabled — if not, this is almost certainly exploitable']
+},
+{ id:'redirect', name:'Open Redirect', cat:'Request Forgery', sev:'medium',
+  theory:'The application redirects to a URL taken from user input (often a "next"/"return"/"url" parameter) without validating it stays within the app, which is commonly abused for phishing or to slip past OAuth allow-lists.',
+  example:'A next= parameter pointing at an external look-alike domain sends the victim straight to a convincing phishing page right after they trust-clicked a legitimate link.',
+  tools:[
+    {name:'Burp scanner / manual parameter sweep', cmd:'# test next, return, redirect, url params with external domains and encoded variants'}
+  ],
+  manual:['Test //evil.com, https:evil.com, and @ tricks like https://target.com@evil.com','Check whether the redirect parameter is reused inside an OAuth flow — that can leak tokens to the attacker domain','Confirm whether the validation is a prefix check that a path like /target.com.evil.com defeats']
+},
+{ id:'cors', name:'CORS Misconfiguration', cat:'Configuration', sev:'medium',
+  theory:'The server reflects an arbitrary Origin header back in Access-Control-Allow-Origin while also setting Access-Control-Allow-Credentials: true, letting any attacker-controlled page read authenticated API responses cross-origin.',
+  example:'Sending an arbitrary Origin header to an authenticated API gets it reflected verbatim in the response, meaning a page on any other domain can read that user\u2019s private data via fetch().',
+  tools:[
+    {name:'corsy — automated CORS misconfig scanning', cmd:'python3 corsy.py -u https://target.com -t 10'},
+    {name:'curl — manual header check', cmd:'curl -H "Origin: https://evil.com" -I https://target.com/api/me'}
+  ],
+  manual:['Check how the app handles the null origin and any wildcard-style subdomain regex','Confirm the credentials flag is actually set before treating a reflected origin as exploitable']
+},
+{ id:'takeover', name:'Subdomain Takeover', cat:'Configuration', sev:'high',
+  theory:'A subdomain\u2019s DNS record (typically a CNAME) points to a third-party service — S3, Heroku, Azure, GitHub Pages — that is no longer claimed. An attacker can claim that resource and serve their own content on the victim\u2019s trusted subdomain.',
+  example:'A long-forgotten promotional subdomain still has a CNAME to a cloud app that was deleted months ago; registering a new app with that same name on the same provider lets an attacker take over the subdomain.',
+  tools:[
+    {name:'subzy — fast takeover detection', cmd:'subzy run --targets subs.txt'},
+    {name:'subjack — alternative takeover scanner', cmd:'subjack -w subs.txt -t 50 -timeout 30 -ssl -o takeover_results.txt'},
+    {name:'nuclei — takeover templates', cmd:'nuclei -l subs.txt -t takeovers/ -o takeover.txt'}
+  ],
+  manual:['dig CNAME on every discovered subdomain and check it against a known dangling-service fingerprint list','Only attempt to actually claim a resource where the program\u2019s policy clearly allows it']
+},
+{ id:'api', name:'API Security — BOLA, Mass Assignment & Rate Limiting', cat:'API', sev:'high',
+  theory:'REST and GraphQL APIs commonly skip per-object authorization checks (BOLA — the API form of IDOR), accept unexpected extra fields in a JSON body that map straight onto sensitive backend fields (mass assignment), and omit rate limiting on sensitive endpoints.',
+  example:'A PATCH request to a user object with an added isAdmin field set to true gets silently written to the database because the backend blindly maps the whole JSON body onto the user object.',
+  tools:[
+    {name:'graphql-cop — common GraphQL misconfig checks', cmd:'graphql-cop -t https://target.com/graphql'},
+    {name:'clairvoyance — recover schema when introspection is disabled', cmd:'clairvoyance -o schema.json https://target.com/graphql'},
+    {name:'Postman / Burp — manual JSON body field fuzzing', cmd:'# add role, isAdmin, isVerified, price, balance fields to update requests and see what sticks'}
+  ],
+  manual:['Try a GraphQL introspection query first; if blocked, brute force field/type names instead','Enumerate every documented field on every object, even fields not shown anywhere in the UI','Specifically check rate limiting on login, OTP, and password-reset endpoints']
+},
+{ id:'logic', name:'Business Logic & Race Conditions', cat:'Logic', sev:'high',
+  theory:'Flaws in the intended workflow itself rather than a technical injection: steps that can be skipped or reordered, limits enforced only client-side, or operations vulnerable to a time-of-check/time-of-use race when fired concurrently.',
+  example:'Redeeming a single-use discount code dozens of times by firing many simultaneous requests before the "already used" flag is persisted to the database.',
+  tools:[
+    {name:'Burp Turbo Intruder — precise race-condition timing', cmd:'# load the single-packet race-condition template, point it at the redeem endpoint'},
+    {name:'Python asyncio/aiohttp — custom concurrent request burst', cmd:'python3 race.py   # fire 20-30 concurrent POSTs at the redeem endpoint with asyncio.gather'}
+  ],
+  manual:['Map the entire intended happy-path workflow, then deliberately skip or reorder steps','Try negative, zero, and decimal quantities anywhere a number is accepted','Test currency-switching mid-flow and coupon stacking against the same order']
+},
+{ id:'misconfig', name:'Security Misconfiguration', cat:'Configuration', sev:'medium',
+  theory:'A catch-all for missing security headers, verbose debug/error pages, default credentials, exposed admin panels, and accidentally public storage buckets or version-control directories.',
+  example:'An exposed .git/ directory under a subdomain lets you reconstruct the full application source code, including hardcoded secrets, just by walking its object store.',
+  tools:[
+    {name:'curl -I — quick security header check', cmd:'curl -I https://target.com'},
+    {name:'GitTools — dump an exposed .git directory', cmd:'./gitdumper.sh https://target.com/.git/ ./dumped_repo'},
+    {name:'s3scanner — find public cloud storage buckets', cmd:'s3scanner scan --bucket target-assets'}
+  ],
+  manual:['Check for /.env, /.git/config, /backup.zip, and similar common-file leaks on every host','Try any discovered admin/login panel with well-known default credentials','Force a 500 error and check whether the stack trace leaks internal paths or framework versions']
+}
+];
+
+/* ============================================================
+   DATA: SITE-TYPE PROFILES
+   ============================================================ */
+const PROFILES = {
+ecommerce: { label:'E-Commerce', icon:'cart',
+  blurb:'Online stores live and die by cart, pricing, and payment logic — that\u2019s where the highest-impact, most unique bugs usually hide.',
+  sections:[
+    { title:'Authentication & Account Security', items:[
+      {t:'Test registration/login for OTP or email-verification step bypass by tampering with the response or skipping the request entirely'},
+      {t:'Check password-reset token expiry, single-use enforcement, and predictability', tool:'Burp Sequencer on the token value'},
+      {t:'Test login and OTP endpoints for missing rate limiting / lockout', tool:'manual repeated attempts, watch for throttling'},
+      {t:'Confirm the session ID rotates after login and invalidates after logout'},
+      {t:'Check guest-checkout-then-register flows for account-linking takeover via email reuse'}
+    ]},
+    { title:'Cart, Pricing & Checkout Logic', items:[
+      {t:'Tamper price, quantity, and currency fields directly in the cart/checkout API request', tool:'Burp Repeater on the JSON body'},
+      {t:'Apply the same single-use coupon many times concurrently to test a redemption race condition', tool:'Burp Turbo Intruder'},
+      {t:'Send negative, zero, or decimal quantities to try to produce a negative order total'},
+      {t:'Switch currency mid-checkout to test for stale exchange-rate caching'},
+      {t:'Try jumping straight to the order-confirmation endpoint, skipping earlier checkout steps'}
+    ]},
+    { title:'Orders, Payments & Webhooks', items:[
+      {t:'Test order/invoice IDs for IDOR — can you view or cancel another user\u2019s order', tool:'ffuf -u "https://target.com/api/order/FUZZ" -w ids.txt -H "Authorization: Bearer LOWPRIV"'},
+      {t:'Replay a previously successful payment-confirmation webhook without revalidating it server-side'},
+      {t:'Test refund logic for a double-refund or refund race condition'},
+      {t:'Confirm the payment gateway\u2019s signature is actually verified server-side, not just trusted from a client redirect'},
+      {t:'Check any "request invoice/order PDF from URL" feature for SSRF'}
+    ]},
+    { title:'Search, Reviews & User Content', items:[
+      {t:'Test the search box and filter/sort params for SQLi and XSS', tool:'sqlmap -u "https://target.com/search?q=test" --batch; dalfox url "https://target.com/search?q=FUZZ"'},
+      {t:'Test product reviews, Q&A, and seller-reply fields for stored XSS'},
+      {t:'Test "import product image from URL" (seller/admin side) for SSRF'},
+      {t:'Check autocomplete/search-suggestion endpoints for unauthenticated data leakage'}
+    ]},
+    { title:'Seller / Admin Panels & APIs', items:[
+      {t:'Enumerate hidden admin/seller subdomains', tool:'subfinder -d target.com -all; httpx -l subs.txt -title'},
+      {t:'Try reaching seller/admin API routes directly from a plain buyer account'},
+      {t:'Add isAdmin/role-style fields to your own profile-update request to test mass assignment'},
+      {t:'Run introspection against any /graphql endpoint', tool:'graphql-cop -t https://target.com/graphql'}
+    ]},
+    { title:'Infrastructure & Misconfig', items:[
+      {t:'Check storefront and CDN subdomains for exposed .git/.env/backup files'},
+      {t:'Run a subdomain-takeover scan across every discovered subdomain', tool:'subzy run --targets subs.txt'},
+      {t:'Check the API subdomain for a credentialed CORS misconfiguration', tool:'python3 corsy.py -u https://target.com'},
+      {t:'Audit security headers (CSP, HSTS, X-Frame-Options) site-wide', tool:'curl -I https://target.com'}
+    ]}
+  ]
+},
+govedu: { label:'Government & Education', icon:'gov',
+  blurb:'Sprawling departments, long-lived legacy systems, and strict authorization rules make scope verification the very first step here — not recon.',
+  warning:'Many government (.gov/.mil) systems are NOT in scope for public testing unless an explicit, named vulnerability disclosure program covers them. Education (.edu) institutions vary widely. Always confirm written authorization and the exact in-scope hostnames before any active testing.',
+  sections:[
+    { title:'Scope & Program Verification', items:[
+      {t:'Confirm the exact in-scope hostnames/IP ranges in the agency or university\u2019s published policy before touching anything'},
+      {t:'Check whether the system is run by a third-party vendor/SaaS portal with its own separate ownership and scope'},
+      {t:'Note any explicitly prohibited techniques in the policy (often: no automated scanning, no DoS, no social engineering)'}
+    ]},
+    { title:'Subdomain & Legacy System Discovery', items:[
+      {t:'Enumerate broadly — independent departments often run their own long-forgotten subdomains', tool:'subfinder -d target.edu -all; amass enum -passive -d target.edu'},
+      {t:'Fingerprint CMS/framework versions for known CVEs', tool:'whatweb -a 3 target.edu; nuclei -l live.txt -t cves/'},
+      {t:'Flag subdomains that still resolve but look decommissioned — high subdomain-takeover risk from staff turnover', tool:'subzy run --targets subs.txt'}
+    ]},
+    { title:'Portals, Records & Document Handling', items:[
+      {t:'Test student/staff record or transcript IDs for IDOR (often sequential numbers) — only with an authorized low-privilege test account'},
+      {t:'Test document/FOIA submission forms for upload restriction bypass and filename path traversal'},
+      {t:'Check SSO implementations (Shibboleth/CAS/SAML) for signature validation and replay weaknesses'},
+      {t:'Google-dork for accidentally indexed sensitive documents', tool:'site:target.edu filetype:pdf "confidential"'}
+    ]},
+    { title:'Exposed Assets & Misconfiguration', items:[
+      {t:'Check discovered admin/library/LMS panels (Moodle, Blackboard, etc.) for default credentials'},
+      {t:'Look for exposed Git/SVN repos or build artifacts under department subdomains'},
+      {t:'Check any linked public research-group repos for committed credentials', tool:'gitleaks detect --source . -v'},
+      {t:'Run a TLS/security-header audit across discovered hosts', tool:'./testssl.sh https://target.edu'}
+    ]},
+    { title:'Reporting Considerations', items:[
+      {t:'Use the exact designated disclosure channel (CERT/CISA, the institution\u2019s InfoSec office, or the named VDP) — never disclose publicly first'},
+      {t:'Expect slower response times than commercial bounty programs; document every step carefully'}
+    ]}
+  ]
+},
+ai: { label:'AI / ML Products', icon:'ai',
+  blurb:'Beyond the standard web checklist, AI products add a new surface: the model\u2019s instructions, its tool access, and what it\u2019s allowed to do on your behalf.',
+  sections:[
+    { title:'Prompt & Output Handling', items:[
+      {t:'Try direct prompt injection — phrasing that attempts to override the system instructions ("ignore all previous instructions...")'},
+      {t:'Try indirect prompt injection by embedding instructions inside a document/webpage the model is asked to read or summarize'},
+      {t:'Check whether model output is rendered as raw HTML/Markdown without sanitization', tool:'dalfox or manual payload in any chat-rendering surface'},
+      {t:'Probe for the hidden system prompt or internal tool definitions via creative rephrasing'}
+    ]},
+    { title:'Agentic & Tool-Use Abuse', items:[
+      {t:'If the AI can call tools/plugins/browse/execute code, test whether it can be tricked into unintended actions (excessive agency)'},
+      {t:'Test any "fetch URL / browse / webhook" capability for SSRF', tool:'interactsh-client for out-of-band confirmation'},
+      {t:'Check code-execution sandboxes (if any) for path traversal or unexpected network egress to internal services'}
+    ]},
+    { title:'Data, Session & API Security', items:[
+      {t:'Test conversation/thread/session IDs for IDOR — can you view another user\u2019s chat history by changing an ID'},
+      {t:'Probe with targeted extraction prompts to check for PII or training-data leakage'},
+      {t:'Check client-side bundles and mobile app binaries for hardcoded provider API keys', tool:'grep through JS bundles / APK strings'},
+      {t:'Test rate limiting and cost-abuse: large-context or repeated expensive prompts with no limit'}
+    ]},
+    { title:'Supply Chain & File Handling', items:[
+      {t:'If file upload/analysis is supported (CSV/PDF/images), apply the same file-upload checks as the general library'},
+      {t:'Check plugin/marketplace integrations for unauthenticated or weakly authenticated callbacks'},
+      {t:'Check any custom model/dataset upload path for unsafe deserialization'}
+    ]}
+  ]
+},
+saas: { label:'SaaS / General Tech', icon:'layers',
+  blurb:'Multi-tenant products live or die on whether "my organization" and "your organization" are actually kept apart — at every layer, not just the UI.',
+  sections:[
+    { title:'Multi-Tenancy & Access Control', items:[
+      {t:'Switch the organization/tenant ID in an authenticated API request to confirm real isolation'},
+      {t:'Test permissions across every role tier, not just admin vs. regular user'},
+      {t:'Check team-invite endpoints for privilege escalation via an elevated role parameter on accept'}
+    ]},
+    { title:'API & GraphQL', items:[
+      {t:'Enumerate every API version still live — older versions often skip newer auth checks', tool:'httpx against a wordlist of /api/v1, /api/v2, /api/beta paths'},
+      {t:'Run GraphQL introspection and schema enumeration', tool:'graphql-cop -t https://target.com/graphql; clairvoyance if introspection is disabled'},
+      {t:'Add extra JSON fields to profile/object update requests to test mass assignment'},
+      {t:'Check rate limiting on auth, password-reset, and billing endpoints specifically'}
+    ]},
+    { title:'Integrations, Webhooks & SSO', items:[
+      {t:'Test user-supplied webhook URLs for SSRF', tool:'interactsh-client'},
+      {t:'Check OAuth/SSO redirect_uri allow-list strictness for an open-redirect-to-token-theft chain'},
+      {t:'Check whether incoming webhook payloads are signature-verified or can be forged'}
+    ]},
+    { title:'Infrastructure & Subdomains', items:[
+      {t:'Run a full subdomain sweep including staging/dev/internal-looking hosts', tool:'subfinder -d target.com -all; httpx -l subs.txt -title -status-code'},
+      {t:'Run a subdomain-takeover scan on every discovered CNAME', tool:'subzy run --targets subs.txt'},
+      {t:'Check for exposed cloud storage buckets tied to the product\u2019s asset/CDN subdomains', tool:'s3scanner scan --bucket target-assets'},
+      {t:'Audit security headers and CORS across both the app and API subdomains'}
+    ]}
+  ]
+},
+fintech: { label:'Fintech / Banking', icon:'bank',
+  blurb:'Money amplifies the impact of every logic flaw — focus on transaction integrity, identity verification, and anything involving concurrency.',
+  sections:[
+    { title:'Authentication & Identity', items:[
+      {t:'Test 2FA/OTP endpoints for brute-force resistance and rate limiting (carefully — avoid real lockouts on test accounts)'},
+      {t:'Confirm sensitive actions (transfers, password changes) require fresh re-authentication, not just an existing session'},
+      {t:'Check KYC document upload for the same file-upload checks, plus predictable/unauthenticated document URLs'}
+    ]},
+    { title:'Transactions & Account Logic', items:[
+      {t:'Test account/statement/transaction IDs for IDOR', tool:'ffuf with a low-priv authorized test account only'},
+      {t:'Try negative-amount or fractional-cent transfers to test sign/rounding validation'},
+      {t:'Fire concurrent transfer/withdrawal requests to test for a double-spend-style race condition', tool:'Burp Turbo Intruder'},
+      {t:'Test currency-conversion logic for stale-rate caching or rounding that favors the attacker'}
+    ]},
+    { title:'API & Infrastructure', items:[
+      {t:'Check mobile app traffic for certificate pinning and transport security', tool:'Burp + a mobile proxy setup'},
+      {t:'Check payment-confirmation webhook signature validation'},
+      {t:'Audit security headers, CORS, and look for exposed admin/back-office subdomains'},
+      {t:'Check balance/statement endpoints for rate limiting that would otherwise allow account enumeration'}
+    ]}
+  ]
+},
+generic: { label:'Generic / Any Other Site', icon:'target',
+  blurb:'For anything that doesn\u2019t fit a specific vertical — run this condensed, technology-agnostic pass alongside the full Methodology and Vulnerability Library pages.',
+  sections:[
+    { title:'Recon & Surface Mapping', items:[
+      {t:'Full subdomain enumeration and live-host probing', tool:'subfinder -d target.com -all; httpx -l subs.txt -title -tech-detect'},
+      {t:'Content discovery on every live host', tool:'ffuf -u https://target.com/FUZZ -w common.txt -mc 200,301,302,403'}
+    ]},
+    { title:'Injection', items:[
+      {t:'Test every input for SQL injection and command/template injection', tool:'sqlmap -u "URL" --batch'},
+      {t:'Test every rendered input for reflected/stored/DOM XSS', tool:'dalfox url "URL"'}
+    ]},
+    { title:'Access Control & Auth', items:[
+      {t:'Test every object reference and role boundary for IDOR / broken access control'},
+      {t:'Test password reset, OTP, session handling, and any JWT for the flaws in the Vulnerability Library'}
+    ]},
+    { title:'Request Forgery & Config', items:[
+      {t:'Test any URL-accepting feature for SSRF'},
+      {t:'Audit security headers, default credentials, exposed files/repos/buckets', tool:'curl -I https://target.com'}
+    ]},
+    { title:'Business Logic', items:[
+      {t:'Map the full intended workflow and try skipping steps, replaying steps, or firing them concurrently'}
+    ]}
+  ]
+}
+};
+const PROFILE_ORDER = ['ecommerce','govedu','ai','saas','fintech','generic'];
+
+/* ============================================================
+   DATA: TOOL ARSENAL
+   ============================================================ */
+const TOOL_ARSENAL = [
+{ cat:'Reconnaissance', tools:[
+  {n:'subfinder', d:'Fast passive subdomain enumeration from many public sources.', c:'subfinder -d target.com -all -silent -o subs.txt'},
+  {n:'amass', d:'Deep OSINT-based asset/subdomain discovery and network mapping.', c:'amass enum -passive -d target.com -o amass.txt'},
+  {n:'assetfinder', d:'Quick lookup of domains and subdomains related to a target.', c:'assetfinder --subs-only target.com'},
+  {n:'theHarvester', d:'Gathers emails, names, subdomains, and hosts from public sources.', c:'theHarvester -d target.com -b all'},
+  {n:'gau / waybackurls', d:'Pulls historical URLs from the Wayback Machine, AlienVault OTX, and Common Crawl.', c:'gau --subs target.com'}
+]},
+{ cat:'Scanning & Fuzzing', tools:[
+  {n:'httpx', d:'Probes hosts for liveness, status code, title, and tech stack at scale.', c:'httpx -l subs.txt -title -status-code -tech-detect'},
+  {n:'naabu', d:'Very fast port scanner suited for large host lists.', c:'naabu -l live.txt -top-ports 1000'},
+  {n:'nmap', d:'Detailed port/service/version scanning and scriptable checks.', c:'nmap -sC -sV -p- -T4 target.com'},
+  {n:'ffuf', d:'Fast HTTP fuzzer for directories, parameters, and virtual hosts.', c:'ffuf -u https://target.com/FUZZ -w wordlist.txt -mc 200,301,302,403'},
+  {n:'nuclei', d:'Template-driven vulnerability scanner with a huge community template set.', c:'nuclei -l live.txt -t ~/nuclei-templates/ -severity medium,high,critical'},
+  {n:'katana', d:'JavaScript-aware crawler for building a full URL/endpoint map.', c:'katana -u https://target.com -d 3 -jc'}
+]},
+{ cat:'Proxy & Manual Testing', tools:[
+  {n:'Burp Suite', d:'The core intercepting proxy for inspecting, repeating, and fuzzing every request.', c:'# configure browser proxy to 127.0.0.1:8080, install CA cert'},
+  {n:'OWASP ZAP', d:'Free, open-source alternative to Burp with a similar proxy/scanner workflow.', c:'zap.sh -daemon -port 8090'},
+  {n:'Postman', d:'Convenient for building and replaying complex multi-step API requests.', c:'# GUI tool — import a captured request as a cURL command'}
+]},
+{ cat:'Vulnerability-Specific', tools:[
+  {n:'sqlmap', d:'Automated SQL injection detection and database extraction.', c:'sqlmap -u "https://target.com/item?id=1" --batch --dbs'},
+  {n:'dalfox', d:'Fast, parameter-aware XSS scanning.', c:'dalfox url "https://target.com/search?q=FUZZ"'},
+  {n:'jwt_tool', d:'Comprehensive JWT testing: algorithm confusion, weak secrets, claim tampering.', c:'python3 jwt_tool.py <token> -M at'},
+  {n:'corsy', d:'Automated CORS misconfiguration scanner.', c:'python3 corsy.py -u https://target.com'},
+  {n:'subzy / subjack', d:'Subdomain takeover detection against known dangling-service fingerprints.', c:'subzy run --targets subs.txt'},
+  {n:'graphql-cop', d:'Checks common GraphQL security misconfigurations.', c:'graphql-cop -t https://target.com/graphql'}
+]},
+{ cat:'Secrets & Source Exposure', tools:[
+  {n:'gitleaks', d:'Scans source/history for hardcoded secrets and credentials.', c:'gitleaks detect --source . -v'},
+  {n:'trufflehog', d:'Deep secret-scanning across filesystems, git history, and more.', c:'trufflehog filesystem ./repo'},
+  {n:'GitTools', d:'Reconstructs source code from an exposed .git directory.', c:'./gitdumper.sh https://target.com/.git/ ./dumped'}
+]},
+{ cat:'Reporting', tools:[
+  {n:'CVSS Calculator', d:'Official FIRST.org calculator to score severity and generate a vector string.', c:'# https://www.first.org/cvss/calculator/3.1'},
+  {n:'asciinema', d:'Lightweight terminal recording for clean PoC evidence.', c:'asciinema rec poc.cast'}
+]}
+];
+
+/* ============================================================
+   DATA: RESOURCES
+   ============================================================ */
+const RESOURCES = [
+{ n:'OWASP Testing Guide & Top 10', d:'The foundational, vendor-neutral reference for web app security testing methodology.', u:'https://owasp.org' },
+{ n:'PortSwigger Web Security Academy', d:'Free, extremely hands-on labs for every major vulnerability class — the best place to practice a technique before hunting it live.', u:'https://portswigger.net/web-security' },
+{ n:'HackerOne Hacktivity', d:'Thousands of disclosed public reports — read how others actually found and proved real bugs.', u:'https://hackerone.com/hacktivity' },
+{ n:'Bugcrowd University', d:'Free structured courses covering recon, web vulns, mobile, and report writing.', u:'https://www.bugcrowd.com/hackers/bugcrowd-university/' },
+{ n:'PentesterLab', d:'Paid but excellent vulnerable-by-design exercises mapped closely to real bug classes.', u:'https://pentesterlab.com' },
+{ n:'TryHackMe / Hack The Box', d:'Broader offensive-security labs to round out recon, exploitation, and pivoting skills.', u:'https://tryhackme.com' },
+{ n:'SecLists', d:'The standard wordlist collection for fuzzing, directory discovery, and payload testing.', u:'https://github.com/danielmiessler/SecLists' },
+{ n:'ProjectDiscovery docs', d:'Official documentation for subfinder, httpx, nuclei, naabu and the rest of that toolchain.', u:'https://docs.projectdiscovery.io' },
+{ n:'FIRST.org CVSS Calculator', d:'Score severity consistently and generate the vector string for your reports.', u:'https://www.first.org/cvss/calculator/3.1' }
+];
+
+/* ============================================================
+   APP STATE
+   ============================================================ */
+let STATE = {
+  methodProgress:{},
+  vulnsReviewed:[],
+  targets:[],
+  vulnQuery:'',
+  vulnSev:'all',
+  pendingType:null,
+  currentTargetData:null
+};
+
+const NAV_ITEMS = [
+  {id:'dashboard', label:'Dashboard', icon:'grid'},
+  {id:'methodology', label:'Methodology', icon:'list'},
+  {id:'vulns', label:'Vulnerability Library', icon:'bug'},
+  {id:'targets', label:'Target Profiles', icon:'target'},
+  {id:'tools', label:'Tool Arsenal', icon:'terminal'},
+  {id:'resources', label:'Resources', icon:'book'}
+];
+
+/* ---------- persistence ---------- */
+async function loadAppState(){
+  const mp = await stGet('bhos:methodology-progress');
+  STATE.methodProgress = mp ? JSON.parse(mp) : {};
+  const vr = await stGet('bhos:vulns-reviewed');
+  STATE.vulnsReviewed = vr ? JSON.parse(vr) : [];
+  const ti = await stGet('bhos:targets-index');
+  STATE.targets = ti ? JSON.parse(ti) : [];
+}
+function saveMethodProgress(){ return stSet('bhos:methodology-progress', JSON.stringify(STATE.methodProgress)); }
+function saveVulnsReviewed(){ return stSet('bhos:vulns-reviewed', JSON.stringify(STATE.vulnsReviewed)); }
+function saveTargetsIndex(){ return stSet('bhos:targets-index', JSON.stringify(STATE.targets)); }
+async function getTargetData(id){
+  const raw = await stGet('bhos:target:'+id);
+  return raw ? JSON.parse(raw) : {checklistState:{}, notes:''};
+}
+function saveTargetData(id, data){ return stSet('bhos:target:'+id, JSON.stringify(data)); }
+
+/* ---------- stats ---------- */
+function methodologyStats(){
+  let total=0, done=0;
+  PHASES.forEach(p=>{
+    total += p.checklist.length;
+    p.checklist.forEach((_,idx)=>{ if(STATE.methodProgress[p.id+'-'+idx]) done++; });
+  });
+  return {total, done, pct: total ? Math.round(done/total*100) : 0};
+}
+function targetStats(checklistState, type){
+  const profile = PROFILES[type] || PROFILES.generic;
+  let total=0, done=0;
+  profile.sections.forEach((sec,si)=>{
+    sec.items.forEach((it,ii)=>{ total++; if(checklistState[si+'-'+ii]) done++; });
+  });
+  return {total, done, pct: total ? Math.round(done/total*100) : 0};
+}
+
+/* ---------- small render helpers ---------- */
+function codeBlock(label, command){
+  return `<div class="codeblock"><span class="tool-name">${escapeHtml(label)}</span><pre>${escapeHtml(command)}</pre>`+
+    `<button class="copy-btn" type="button" data-action="copy" data-cmd="${encodeURIComponent(command)}" title="Copy command" aria-label="Copy command">${ICON('copy',14)}</button></div>`;
+}
+function emptyState(icon,title,desc){
+  return `<div class="empty-state">${ICON(icon,40)}<h3>${escapeHtml(title)}</h3><p>${escapeHtml(desc)}</p></div>`;
+}
+function navCard(route,icon,title,desc){
+  return `<div class="card clickable" data-route="${route}" role="button" tabindex="0">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--accent-dim);color:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:12px;">${ICON(icon,18)}</div>
+    <h3 style="font-size:15px;margin-bottom:6px;">${escapeHtml(title)}</h3>
+    <p style="font-size:13px;margin:0;">${escapeHtml(desc)}</p>
+  </div>`;
+}
+
+/* ============================================================
+   PAGE RENDERERS
+   ============================================================ */
+function renderDashboard(el){
+  const ms = methodologyStats();
+  const toolCount = TOOL_ARSENAL.reduce((a,c)=>a+c.tools.length,0);
+  el.innerHTML = `
+    <div class="page-head">
+      <span class="eyebrow">system overview</span>
+      <h1>Welcome back, hunter.</h1>
+      <p class="lede">BHOS keeps your methodology, vulnerability reference, and per-target checklists in one place — from the first recon command to the final report.</p>
+    </div>
+    <div class="callout warn">
+      ${ICON('alertTriangle',18)}
+      <p><strong class="label">Stay in scope</strong>Only test assets you are explicitly authorized to test — a bug bounty program's defined scope, written permission, or your own lab. Testing without authorization can be illegal, regardless of intent.</p>
+    </div>
+    <div class="grid cols-4">
+      <div class="card stat"><div class="num">${ms.pct}%</div><div class="lbl">Methodology complete</div></div>
+      <div class="card stat"><div class="num">${STATE.targets.length}</div><div class="lbl">Targets tracked</div></div>
+      <div class="card stat"><div class="num">${VULNS.length}</div><div class="lbl">Vulnerability classes</div></div>
+      <div class="card stat"><div class="num">${toolCount}</div><div class="lbl">Tools indexed</div></div>
+    </div>
+    <div class="section-title-row"><h2>Where to go</h2></div>
+    <div class="grid cols-3">
+      ${navCard('methodology','list','Methodology','The 7-phase, start-to-end process: recon, mapping, discovery, exploitation, and reporting.')}
+      ${navCard('vulns','bug','Vulnerability Library','Theory, a worked example, tools and manual tests for every major bug class.')}
+      ${navCard('targets','target','Target Profiles','Add a real target, pick its category, and get a tailored checklist with commands.')}
+      ${navCard('tools','terminal','Tool Arsenal','Every tool mentioned across BHOS, grouped by purpose, with a ready-to-run command.')}
+      ${navCard('resources','book','Resources','Labs, write-ups, and references to keep leveling up.')}
+    </div>
+  `;
+}
+
+function renderPhase(p){
+  const total = p.checklist.length;
+  const done = p.checklist.reduce((a,_,idx)=> a+(STATE.methodProgress[p.id+'-'+idx]?1:0), 0);
+  return `
+  <details class="acc" data-phase="${p.id}">
+    <summary><span class="tag-step">${p.num}</span> ${escapeHtml(p.title)} <span class="badge neutral">${done}/${total}</span> <span class="chev">${ICON('chevron',16)}</span></summary>
+    <div class="acc-body">
+      <p>${escapeHtml(p.theory)}</p>
+      <div class="subhead">Tools &amp; commands</div>
+      ${p.tools.map(t=>codeBlock(t.name,t.cmd)).join('')}
+      <div class="subhead">Checklist</div>
+      ${p.checklist.map((c,idx)=>{
+        const key = p.id+'-'+idx;
+        const checked = !!STATE.methodProgress[key];
+        return `<div class="check-item ${checked?'done':''}"><input type="checkbox" data-group="method" data-key="${key}" ${checked?'checked':''}><div class="ci-text">${escapeHtml(c)}</div></div>`;
+      }).join('')}
+    </div>
+  </details>`;
+}
+function renderMethodology(el){
+  const ms = methodologyStats();
+  el.innerHTML = `
+   <div class="page-head">
+     <span class="eyebrow">start to end</span>
+     <h1>The Methodology</h1>
+     <p class="lede">Seven phases, in order. Work top to bottom on a new target, then jump back to the relevant phase once you're deep into testing. Progress saves automatically.</p>
+     <div class="progress-row" style="max-width:320px;margin-top:14px;">
+       <div class="progress-track"><div class="progress-fill" style="width:${ms.pct}%"></div></div>
+       <span class="pct">${ms.pct}%</span>
+     </div>
+   </div>
+   ${PHASES.map(renderPhase).join('')}
+  `;
+}
+
+function renderVulnCard(v){
+  const reviewed = STATE.vulnsReviewed.includes(v.id);
+  return `<details class="acc" data-vuln="${v.id}">
+    <summary><span class="badge ${v.sev}">${v.sev}</span> ${escapeHtml(v.name)} <span class="chev">${ICON('chevron',16)}</span></summary>
+    <div class="acc-body">
+      <span class="type-pill" style="margin-bottom:12px;display:inline-flex;">${escapeHtml(v.cat)}</span>
+      <div class="subhead">What it is</div>
+      <p>${escapeHtml(v.theory)}</p>
+      <div class="subhead">Example</div>
+      <p>${escapeHtml(v.example)}</p>
+      <div class="subhead">Tools &amp; commands</div>
+      ${v.tools.map(t=>codeBlock(t.name,t.cmd)).join('')}
+      <div class="subhead">Manual testing</div>
+      <ul class="manual-list">${v.manual.map(m=>`<li>${escapeHtml(m)}</li>`).join('')}</ul>
+      <label style="display:flex;align-items:center;gap:10px;margin-top:16px;cursor:pointer;min-height:32px;">
+        <input type="checkbox" data-action="vulnReviewed" data-id="${v.id}" ${reviewed?'checked':''}>
+        <span style="font-size:13px;color:var(--text-dim);">Mark as reviewed</span>
+      </label>
+    </div>
+  </details>`;
+}
+function renderVulns(el, opts){
+  opts = opts || {};
+  const q = (opts.q !== undefined ? opts.q : STATE.vulnQuery).toLowerCase();
+  const sev = opts.sev || STATE.vulnSev;
+  STATE.vulnQuery = q; STATE.vulnSev = sev;
+  const sevs = ['all','critical','high','medium','low'];
+  const filtered = VULNS.filter(v=>{
+    const matchesQ = !q || v.name.toLowerCase().includes(q) || v.cat.toLowerCase().includes(q);
+    const matchesSev = sev==='all' || v.sev===sev;
+    return matchesQ && matchesSev;
+  });
+  el.innerHTML = `
+    <div class="page-head">
+      <span class="eyebrow">reference</span>
+      <h1>Vulnerability Library</h1>
+      <p class="lede">Theory, a concrete example, the tools/commands to test for it, and manual techniques — for every major class you'll run into.</p>
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">${ICON('search',16)}<input type="text" id="vulnSearch" placeholder="Search vulnerability classes…" value="${escapeHtml(q)}"></div>
+      ${sevs.map(s=>`<span class="chip ${sev===s?'active':''}" data-action="vulnSev" data-sev="${s}">${s==='all'?'All':s.charAt(0).toUpperCase()+s.slice(1)}</span>`).join('')}
+    </div>
+    <div id="vulnList">
+      ${filtered.length ? filtered.map(renderVulnCard).join('') : emptyState('bug','No matches','Try a different search term or severity filter.')}
+    </div>
+  `;
+  const input = document.getElementById('vulnSearch');
+  if(input && opts.refocus){ input.focus(); const v=input.value; input.setSelectionRange(v.length,v.length); }
+}
+
+function renderTargetCard(t){
+  const profile = PROFILES[t.type] || PROFILES.generic;
+  return `<div class="target-card" data-route="targets/${t.id}" role="button" tabindex="0">
+    <div class="row1">
+      <span class="type-pill">${ICON(profile.icon,12)} ${escapeHtml(profile.label)}</span>
+      <button class="btn sm danger-outline" data-action="deleteTarget" data-id="${t.id}" title="Delete target" aria-label="Delete target ${escapeHtml(t.name)}">${ICON('trash',14)}</button>
+    </div>
+    <h3>${escapeHtml(t.name)}</h3>
+    <div class="progress-row" style="margin-top:12px;">
+      <div class="progress-track"><div class="progress-fill" style="width:${t.pct||0}%"></div></div>
+      <span class="pct">${t.pct||0}%</span>
+    </div>
+  </div>`;
+}
+function renderTargetsList(el){
+  el.innerHTML = `
+   <div class="page-head">
+     <span class="eyebrow">apply it to a real site</span>
+     <h1>Target Profiles</h1>
+     <p class="lede">Add a site you're authorized to test, pick its category, and get a tailored checklist with the exact tools and commands for that kind of target.</p>
+   </div>
+   <div class="toolbar">
+     <div class="topbar-spacer"></div>
+     <button class="btn primary" data-route="targets/new">${ICON('plus',16)} Add target</button>
+   </div>
+   <div id="targetGrid" class="grid cols-3">
+     ${STATE.targets.map(renderTargetCard).join('')}
+   </div>
+   ${!STATE.targets.length ? emptyState('target','No targets yet','Add your first authorized target to get a tailored checklist.') : ''}
+  `;
+}
+function renderTargetForm(el){
+  STATE.pendingType = null;
+  el.innerHTML = `
+    <div class="back-link" data-route="targets">${ICON('arrowLeft',16)} Back to targets</div>
+    <div class="page-head"><span class="eyebrow">new target</span><h1>Add a target</h1><p class="lede">This only creates a checklist in your own workspace — it does not scan or contact the site.</p></div>
+    <div class="card" style="max-width:560px;">
+      <div class="field">
+        <label class="field-label" for="targetName">Site name / domain</label>
+        <input type="text" id="targetName" placeholder="e.g. shop.example.com" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="field-label">Site category</label>
+        <div class="grid cols-2" id="typeGrid">
+          ${PROFILE_ORDER.map(key=>`<div class="card clickable" data-type-choice="${key}" style="padding:14px;" role="button" tabindex="0">
+             <div style="display:flex;align-items:center;gap:10px;">${ICON(PROFILES[key].icon,18)}<b style="font-size:13.5px;">${escapeHtml(PROFILES[key].label)}</b></div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <button class="btn primary" id="createTargetBtn" data-action="createTarget" style="width:100%;justify-content:center;" disabled>${ICON('plus',16)} Create checklist</button>
+    </div>
+  `;
+}
+function renderProfileSection(sec, si, checklistState, isOpen){
+  const done = sec.items.reduce((a,_,ii)=>a+(checklistState[si+'-'+ii]?1:0),0);
+  return `<details class="acc" ${isOpen?'open':''}>
+    <summary>${escapeHtml(sec.title)} <span class="badge neutral">${done}/${sec.items.length}</span><span class="chev">${ICON('chevron',16)}</span></summary>
+    <div class="acc-body">
+      ${sec.items.map((it,ii)=>{
+        const key = si+'-'+ii;
+        const checked = !!checklistState[key];
+        const meta = it.tool ? `<span class="ci-meta">Try: <code>${escapeHtml(it.tool)}</code></span>` : '';
+        return `<div class="check-item ${checked?'done':''}"><input type="checkbox" data-group="target" data-key="${key}" ${checked?'checked':''}><div class="ci-text">${escapeHtml(it.t)}${meta}</div></div>`;
+      }).join('')}
+    </div>
+  </details>`;
+}
+async function renderTargetDetail(el, id){
+  const t = STATE.targets.find(x=>x.id===id);
+  if(!t){ el.innerHTML = emptyState('target','Target not found','It may have been deleted. Head back to Target Profiles to add a new one.'); return; }
+  const data = await getTargetData(id);
+  STATE.currentTargetData = data;
+  const profile = PROFILES[t.type] || PROFILES.generic;
+  const stats = targetStats(data.checklistState, t.type);
+  el.innerHTML = `
+    <div class="back-link" data-route="targets">${ICON('arrowLeft',16)} Back to targets</div>
+    <div class="page-head">
+      <span class="eyebrow">${escapeHtml(profile.label)}</span>
+      <h1 style="font-family:var(--mono);font-size:22px;">${escapeHtml(t.name)}</h1>
+      <p class="lede">${escapeHtml(profile.blurb)}</p>
+      <div class="progress-row" style="max-width:320px;margin-top:10px;">
+        <div class="progress-track"><div class="progress-fill" style="width:${stats.pct}%"></div></div>
+        <span class="pct">${stats.pct}%</span>
+      </div>
+    </div>
+    ${profile.warning ? `<div class="callout danger">${ICON('alertOctagon',18)}<p><strong class="label">Before you start</strong>${escapeHtml(profile.warning)}</p></div>` : ''}
+    ${profile.sections.map((sec,si)=>renderProfileSection(sec,si,data.checklistState, si===0)).join('')}
+    <div class="card" style="margin-top:18px;">
+      <label class="field-label" for="targetNotes">Notes</label>
+      <textarea id="targetNotes" placeholder="Findings, endpoints to revisit, anything you don\u2019t want to lose…">${escapeHtml(data.notes||'')}</textarea>
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn danger-outline" data-action="deleteTarget" data-id="${t.id}">${ICON('trash',16)} Delete this target</button>
+    </div>
+  `;
+}
+
+function renderTools(el){
+  el.innerHTML = `
+    <div class="page-head"><span class="eyebrow">arsenal</span><h1>Tool Arsenal</h1><p class="lede">Every tool referenced across BHOS, grouped by purpose, with a ready-to-run baseline command.</p></div>
+    ${TOOL_ARSENAL.map(group=>`
+      <div class="section-title-row"><h2>${escapeHtml(group.cat)}</h2></div>
+      <div class="grid cols-2">
+        ${group.tools.map(t=>`
+          <div class="card">
+            <h3 style="font-family:var(--mono);font-size:14.5px;">${escapeHtml(t.n)}</h3>
+            <p style="font-size:13px;">${escapeHtml(t.d)}</p>
+            ${codeBlock('usage', t.c)}
+          </div>
+        `).join('')}
+      </div>
+    `).join('')}
+  `;
+}
+
+function renderResources(el){
+  el.innerHTML = `
+   <div class="page-head"><span class="eyebrow">keep leveling up</span><h1>Resources</h1><p class="lede">Labs, references, and disclosed write-ups worth a regular look.</p></div>
+   <div class="grid cols-2">
+     ${RESOURCES.map(r=>`<a class="card clickable" href="${escapeHtml(r.u)}" target="_blank" rel="noopener noreferrer" style="display:block;text-decoration:none;color:inherit;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <h3 style="font-size:14.5px;">${escapeHtml(r.n)}</h3>
+          <span style="color:var(--text-faint);flex-shrink:0;">${ICON('external',16)}</span>
+        </div>
+        <p style="font-size:13px;margin:0;">${escapeHtml(r.d)}</p>
+     </a>`).join('')}
+   </div>
+  `;
+}
+
+/* ============================================================
+   ROUTER
+   ============================================================ */
+function parseHash(){
+  const h = location.hash.replace('#','') || 'dashboard';
+  const parts = h.split('/');
+  return {route: parts[0] || 'dashboard', id: parts[1]};
+}
+function navigate(route, id){
+  location.hash = id ? `${route}/${id}` : route;
+}
+function renderSidebarNav(activeRoute){
+  const html = NAV_ITEMS.map(n=>`<div class="nav-item ${activeRoute===n.id?'active':''}" data-route="${n.id}" role="button" tabindex="0">${ICON(n.icon,18)}<span>${n.label}</span></div>`).join('');
+  document.getElementById('navList').innerHTML = `<div class="nav-section-label">Modules</div>${html}`;
+}
+function updateCrumb(route){
+  const labelMap = {dashboard:'Dashboard', methodology:'Methodology', vulns:'Vulnerability Library', targets:'Target Profiles', tools:'Tool Arsenal', resources:'Resources'};
+  document.getElementById('crumb').innerHTML = `BHOS / <b>${labelMap[route] || 'Dashboard'}</b>`;
+}
+function updateGlobalProgressUI(){
+  const {pct} = methodologyStats();
+  document.getElementById('globalProgress').innerHTML = `<span class="gp-text">Methodology</span><div class="progress-track" style="width:90px"><div class="progress-fill" style="width:${pct}%"></div></div><span class="mono">${pct}%</span>`;
+}
+async function renderRoute(){
+  const {route, id} = parseHash();
+  renderSidebarNav(route);
+  closeSidebarMobile();
+  updateCrumb(route);
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+  switch(route){
+    case 'dashboard': renderDashboard(content); break;
+    case 'methodology': renderMethodology(content); break;
+    case 'vulns': renderVulns(content); break;
+    case 'targets':
+      if(id === 'new') renderTargetForm(content);
+      else if(id) await renderTargetDetail(content, id);
+      else renderTargetsList(content);
+      break;
+    case 'tools': renderTools(content); break;
+    case 'resources': renderResources(content); break;
+    default: renderDashboard(content);
+  }
+  updateGlobalProgressUI();
+  content.focus();
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+function updateBadgeCount(detailsEl){
+  if(!detailsEl) return;
+  const total = detailsEl.querySelectorAll('.check-item').length;
+  const done = detailsEl.querySelectorAll('.check-item.done').length;
+  const badge = detailsEl.querySelector('summary .badge.neutral');
+  if(badge) badge.textContent = `${done}/${total}`;
+}
+function updateMethodPageProgressBar(){
+  const ms = methodologyStats();
+  const bar = document.querySelector('#content .page-head .progress-fill');
+  const pctEl = document.querySelector('#content .page-head .pct');
+  if(bar) bar.style.width = ms.pct+'%';
+  if(pctEl) pctEl.textContent = ms.pct+'%';
+}
+function handleTypeChoice(key){
+  STATE.pendingType = key;
+  document.querySelectorAll('#typeGrid [data-type-choice]').forEach(elx=>{
+    elx.classList.toggle('selected', elx.getAttribute('data-type-choice')===key);
+  });
+  const nameInput = document.getElementById('targetName');
+  const btn = document.getElementById('createTargetBtn');
+  if(btn) btn.disabled = !((nameInput && nameInput.value.trim()) && STATE.pendingType);
+}
+async function createTarget(){
+  const nameInput = document.getElementById('targetName');
+  const name = nameInput ? nameInput.value.trim() : '';
+  if(!name || !STATE.pendingType) return;
+  const id = uid();
+  const entry = {id, name, type: STATE.pendingType, createdAt: Date.now(), pct: 0};
+  STATE.targets.unshift(entry);
+  await saveTargetsIndex();
+  await saveTargetData(id, {checklistState:{}, notes:''});
+  STATE.pendingType = null;
+  navigate('targets', id);
+}
+function doDeleteTarget(id){
+  STATE.targets = STATE.targets.filter(x=>x.id!==id);
+  saveTargetsIndex();
+  stDelete('bhos:target:'+id);
+  const cur = parseHash();
+  if(cur.id===id){ location.hash = 'targets'; }
+  renderRoute();
+}
+function confirmDeleteTarget(id, btnEl){
+  if(!btnEl) { doDeleteTarget(id); return; }
+  if(btnEl.getAttribute('data-confirm')==='1'){ doDeleteTarget(id); return; }
+  btnEl.setAttribute('data-confirm','1');
+  btnEl.setAttribute('data-prev-title', btnEl.getAttribute('title')||'');
+  btnEl.setAttribute('title','Click again to confirm deletion');
+  btnEl.style.background='var(--danger)';
+  btnEl.style.color='#1A0508';
+  btnEl.style.borderColor='var(--danger)';
+  setTimeout(()=>{
+    if(btnEl.isConnected && btnEl.getAttribute('data-confirm')==='1'){
+      btnEl.removeAttribute('data-confirm');
+      btnEl.style.background=''; btnEl.style.color=''; btnEl.style.borderColor='';
+      btnEl.setAttribute('title', btnEl.getAttribute('data-prev-title')||'');
+    }
+  }, 3000);
+}
+function fallbackCopy(text, cb){
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0'; ta.style.top='0'; ta.style.left='0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    cb();
+  }catch(e){ /* clipboard not available — fail silently */ }
+}
+function copyCmd(btn, encoded){
+  let text='';
+  try{ text = decodeURIComponent(encoded); }catch(e){ text = encoded; }
+  const onDone = ()=>{
+    const old = btn.innerHTML;
+    btn.classList.add('copied');
+    btn.innerHTML = ICON('check',14);
+    setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML = old; }, 1200);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(onDone).catch(()=>fallbackCopy(text, onDone));
+  } else {
+    fallbackCopy(text, onDone);
+  }
+}
+
+/* ============================================================
+   EVENT DELEGATION
+   ============================================================ */
+function onNavClick(e){
+  const item = e.target.closest('.nav-item');
+  if(!item) return;
+  navigate(item.getAttribute('data-route'));
+}
+function onContentClick(e){
+  const typeChoice = e.target.closest('[data-type-choice]');
+  if(typeChoice){ handleTypeChoice(typeChoice.getAttribute('data-type-choice')); return; }
+
+  const actionEl = e.target.closest('[data-action]');
+  if(actionEl){
+    e.stopPropagation();
+    const action = actionEl.getAttribute('data-action');
+    if(action==='copy') copyCmd(actionEl, actionEl.getAttribute('data-cmd'));
+    else if(action==='vulnSev') renderVulns(document.getElementById('content'), {sev: actionEl.getAttribute('data-sev'), q: STATE.vulnQuery});
+    else if(action==='createTarget') createTarget();
+    else if(action==='deleteTarget') confirmDeleteTarget(actionEl.getAttribute('data-id'), actionEl);
+    return;
+  }
+  const routeEl = e.target.closest('[data-route]');
+  if(routeEl){ navigate(routeEl.getAttribute('data-route')); return; }
+}
+let notesTimer = null;
+function onContentChange(e){
+  const t = e.target;
+  if(t.matches && t.matches('input[type=checkbox][data-group="method"]')){
+    const key = t.getAttribute('data-key');
+    STATE.methodProgress[key] = t.checked;
+    saveMethodProgress();
+    t.closest('.check-item').classList.toggle('done', t.checked);
+    updateBadgeCount(t.closest('details.acc'));
+    updateGlobalProgressUI();
+    updateMethodPageProgressBar();
+  } else if(t.matches && t.matches('input[type=checkbox][data-action="vulnReviewed"]')){
+    const id = t.getAttribute('data-id');
+    if(t.checked){ if(!STATE.vulnsReviewed.includes(id)) STATE.vulnsReviewed.push(id); }
+    else { STATE.vulnsReviewed = STATE.vulnsReviewed.filter(x=>x!==id); }
+    saveVulnsReviewed();
+  } else if(t.matches && t.matches('input[type=checkbox][data-group="target"]')){
+    const key = t.getAttribute('data-key');
+    if(!STATE.currentTargetData) return;
+    STATE.currentTargetData.checklistState[key] = t.checked;
+    t.closest('.check-item').classList.toggle('done', t.checked);
+    updateBadgeCount(t.closest('details.acc'));
+    const id = parseHash().id;
+    const tEntry = STATE.targets.find(x=>x.id===id);
+    if(tEntry){
+      const stats = targetStats(STATE.currentTargetData.checklistState, tEntry.type);
+      tEntry.pct = stats.pct;
+      const bar = document.querySelector('#content .page-head .progress-fill');
+      const pctEl = document.querySelector('#content .page-head .pct');
+      if(bar) bar.style.width = stats.pct+'%';
+      if(pctEl) pctEl.textContent = stats.pct+'%';
+      saveTargetsIndex();
+    }
+    saveTargetData(id, STATE.currentTargetData);
+  } else if(t.id === 'targetNotes'){
+    if(!STATE.currentTargetData) return;
+    STATE.currentTargetData.notes = t.value;
+    const id = parseHash().id;
+    clearTimeout(notesTimer);
+    notesTimer = setTimeout(()=>{ saveTargetData(id, STATE.currentTargetData); }, 400);
+  }
+}
+function onContentInput(e){
+  if(e.target.id === 'vulnSearch'){
+    renderVulns(document.getElementById('content'), {q: e.target.value, sev: STATE.vulnSev, refocus:true});
+  } else if(e.target.id === 'targetName'){
+    const btn = document.getElementById('createTargetBtn');
+    if(btn) btn.disabled = !(e.target.value.trim() && STATE.pendingType);
+  } else if(e.target.id === 'targetNotes'){
+    onContentChange(e);
+  }
+}
+function openSidebarMobile(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('scrim').classList.add('show'); }
+function closeSidebarMobile(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('scrim').classList.remove('show'); }
+function toggleSidebarMobile(){ document.getElementById('sidebar').classList.contains('open') ? closeSidebarMobile() : openSidebarMobile(); }
+function onGlobalKeydown(e){
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest && e.target.closest('[role="button"][tabindex="0"]');
+  if(el){ e.preventDefault(); el.click(); }
+}
+
+/* ============================================================
+   BOOT SEQUENCE
+   ============================================================ */
+function dismissBoot(){
+  const boot = document.getElementById('boot');
+  const app = document.getElementById('app');
+  if(boot){
+    boot.style.transition = 'opacity .25s ease';
+    boot.style.opacity = '0';
+    setTimeout(()=>{ if(boot.parentNode) boot.parentNode.removeChild(boot); }, 260);
+  }
+  if(app) app.hidden = false;
+}
+function setupBoot(){
+  const boot = document.getElementById('boot');
+  if(!boot) return;
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced){ dismissBoot(); return; }
+  boot.addEventListener('click', dismissBoot);
+  setTimeout(dismissBoot, 1700);
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+async function init(){
+  const brandIcon = document.getElementById('iconBrand');
+  if(brandIcon) brandIcon.innerHTML = ICON('terminal',18);
+  const navToggleBtn = document.getElementById('navToggle');
+  if(navToggleBtn) navToggleBtn.innerHTML = ICON('menu',20);
+
+  await loadAppState();
+
+  document.getElementById('navList').addEventListener('click', onNavClick);
+  if(navToggleBtn) navToggleBtn.addEventListener('click', toggleSidebarMobile);
+  document.getElementById('scrim').addEventListener('click', closeSidebarMobile);
+  const content = document.getElementById('content');
+  content.addEventListener('click', onContentClick);
+  content.addEventListener('change', onContentChange);
+  content.addEventListener('input', onContentInput);
+  window.addEventListener('hashchange', renderRoute);
+  document.addEventListener('keydown', onGlobalKeydown);
+
+  if(!location.hash) location.hash = 'dashboard';
+  await renderRoute();
+}
+
+setupBoot();
+init();
+</script>
+</body>
+</html>
