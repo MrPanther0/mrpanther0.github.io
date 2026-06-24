@@ -362,7 +362,9 @@ function ICON(name, size){
     layers: `<path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="M3 13l9 5 9-5M3 18l9 5 9-5"/>`,
     bank: `<path d="M3 21h18M4 21V11M20 21V11M2 11l10-7 10 7M8 21v-6M12 21v-6M16 21v-6"/>`,
     server: `<rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/>`,
-    note: `<path d="M5 3h11l3 3v15H5V3Z"/><path d="M16 3v3h3"/><path d="M8 11h8M8 15h8"/>`
+    note: `<path d="M5 3h11l3 3v15H5V3Z"/><path d="M16 3v3h3"/><path d="M8 11h8M8 15h8"/>`,
+    phone: `<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>`,
+    chain: `<path d="M9 15l6-6"/><path d="M8 12 5.5 14.5a3.5 3.5 0 0 0 5 5L13 17"/><path d="M16 12l2.5-2.5a3.5 3.5 0 0 0-5-5L11 7"/>`
   };
   return `<svg ${s}>${paths[name]||paths.note}</svg>`;
 }
@@ -532,7 +534,7 @@ const VULNS = [
   ],
   manual:['Try a single quote, then a boolean pair (id=1 AND 1=1 vs AND 1=2) and compare responses','Test every input vector, not just URL params: cookies, JSON body fields, and headers like X-Forwarded-For','Look for timing differences with SLEEP()-style payloads when no error or content difference appears','Try second-order injection: a value stored now and used unsafely in a query later']
 },
-{ id:'xss', name:'Cross-Site Scripting (XSS)', cat:'Injection', sev:'high',
+{ id:'xss', name:'Cross-Site Scripting (XSS)', cat:'Client-Side', sev:'high',
   theory:'Untrusted input is rendered in a page without proper output encoding, letting an attacker run JavaScript in another user\u2019s browser. Reflected (in the response to one request), stored (saved and shown to other users), and DOM-based (a client-side JS sink like innerHTML or eval using attacker-controlled data) are the three core types.',
   example:'A search box reflects ?q= directly into the page\u2019s HTML; submitting a script-tag style payload executes immediately. For DOM XSS, check whether location.hash or a URL parameter flows into innerHTML or document.write.',
   tools:[
@@ -568,15 +570,13 @@ const VULNS = [
   ],
   manual:['Check that anti-CSRF tokens are actually validated server-side, not just present in the form','Test whether the same action also works via a GET request (no token needed at all)','Check the cookie\u2019s SameSite attribute — Lax/Strict materially reduces real-world exploitability','Re-test JSON-only endpoints; some frameworks block simple-form CSRF but not fetch-based variants']
 },
-{ id:'auth', name:'Authentication, Session & Token Flaws', cat:'Identity', sev:'critical',
-  theory:'Covers weak password reset/OTP logic, session fixation, and JWT/OAuth implementation mistakes — algorithm confusion, weak signing secrets, missing expiry checks, or loose redirect_uri validation in OAuth/SSO flows.',
-  example:'A JWT accepts alg=none or is signed with a short, guessable HMAC secret, letting an attacker forge a token claiming admin privileges without ever knowing the real secret.',
+{ id:'auth', name:'Authentication & Session Management', cat:'Identity', sev:'critical',
+  theory:'Covers the foundations of login and session handling outside JWT/OAuth/MFA specifics: password-reset token design, session fixation and invalidation, and account enumeration through subtly different responses.',
+  example:'A session identifier issued before login stays unchanged after a successful login, letting an attacker who planted that ID earlier simply wait and hijack the now-authenticated session (session fixation).',
   tools:[
-    {name:'jwt_tool — run the full JWT test suite', cmd:'python3 jwt_tool.py <token> -M at'},
-    {name:'jwt_tool — algorithm confusion / none-alg attack', cmd:'python3 jwt_tool.py <token> -X a'},
     {name:'hydra — brute force a login form (only within program rate-limit allowances)', cmd:'hydra -l admin -P passlist.txt target.com http-post-form "/login:user=^USER^&pass=^PASS^:F=incorrect"'}
   ],
-  manual:['Check password-reset token entropy, expiry, and whether it is invalidated after first use','Check OTP endpoints for missing rate limiting (can you brute force a 6-digit code?)','Confirm the session ID actually rotates on login and is invalidated on logout','For OAuth/SSO, check redirect_uri allow-list strictness and the presence/validation of the state parameter']
+  manual:['Check password-reset token entropy, expiry, and whether it is invalidated after first use','Confirm the session ID actually rotates on login and is invalidated on logout','Compare login-failure responses for a registered vs unregistered email to test for account enumeration','Check whether "log out everywhere" actually invalidates other active sessions server-side']
 },
 { id:'upload', name:'File Upload Vulnerabilities', cat:'Input Handling', sev:'high',
   theory:'Insufficient validation of an uploaded file\u2019s type, content, or destination path can allow a web shell, stored XSS (via SVG/HTML), or path traversal through a crafted filename.',
@@ -659,6 +659,172 @@ const VULNS = [
     {name:'s3scanner — find public cloud storage buckets', cmd:'s3scanner scan --bucket target-assets'}
   ],
   manual:['Check for /.env, /.git/config, /backup.zip, and similar common-file leaks on every host','Try any discovered admin/login panel with well-known default credentials','Force a 500 error and check whether the stack trace leaks internal paths or framework versions']
+},
+{ id:'nosqli', name:'NoSQL Injection', cat:'Injection', sev:'high',
+  theory:'Similar idea to SQLi but against document databases like MongoDB — JSON operators ($ne, $gt, $regex, $where) get injected through a body or query string and can bypass authentication entirely instead of just leaking data.',
+  example:'Sending {"username":{"$ne":null},"password":{"$ne":null}} as a JSON login body authenticates as the first user in the collection, because the backend passes the raw JSON operators straight into the MongoDB query.',
+  tools:[{name:'NoSQLMap — automated NoSQL injection testing', cmd:'python3 nosqlmap.py'}],
+  manual:['Try JSON operator payloads ($ne, $gt, $regex) in place of plain string values on login and search forms','Test array-wrapped parameters (param[]=value) against frameworks that auto-parse query strings into objects','Check error messages for MongoDB/CouchDB stack traces that confirm the backend in use']
+},
+{ id:'cmdi', name:'OS Command Injection', cat:'Injection', sev:'critical',
+  theory:'User input reaches a system shell call — often via a "ping this host", file-conversion, or network-diagnostic feature — without sanitization, letting an attacker chain in extra OS commands.',
+  example:'A "ping this host" diagnostic field accepts 8.8.8.8; appending ; whoami or a backtick-wrapped command after it gets executed by the underlying shell call.',
+  tools:[{name:'commix — automated command injection exploitation', cmd:'commix --url="https://target.com/ping?host=8.8.8.8"'}],
+  manual:['Test any feature that plausibly shells out: network diagnostics, file conversion, image processing, PDF export','Try command separators ; | && and backticks, plus blind variants using sleep timing or an out-of-band DNS callback','Use an out-of-band domain (interactsh) to confirm execution when there is no visible output']
+},
+{ id:'ldapi', name:'LDAP Injection', cat:'Injection', sev:'high',
+  theory:'User input is inserted unescaped into an LDAP query — common in enterprise SSO, intranet logins, and directory-search features — letting an attacker change filter logic the same way SQL injection changes a SQL query.',
+  example:'A username field accepting a wildcard-and-filter-breaking payload alters the LDAP filter to match every directory entry, potentially bypassing authentication outright.',
+  tools:[{name:'Burp Repeater — manual LDAP filter payloads', cmd:'# try filter-breaking characters like *)(uid=*))(|(uid=* in directory-backed login/search fields'}],
+  manual:['Test any login or directory-search feature backed by Active Directory/LDAP, common in enterprise and intranet apps','Try wildcard and filter-breaking characters: * ( ) | &','Watch for verbose LDAP error messages that confirm the underlying query structure']
+},
+{ id:'crlf', name:'CRLF / HTTP Header Injection', cat:'Injection', sev:'medium',
+  theory:'User input containing carriage-return/line-feed characters is reflected into an HTTP response header or a downstream log/email header, letting an attacker inject extra headers, split the response, or smuggle content into logs.',
+  example:'A redirect parameter reflected into a Location header accepts an encoded CRLF sequence followed by Set-Cookie:, injecting an attacker-chosen cookie into the response.',
+  tools:[{name:'Burp Repeater — manual CRLF payloads in headers/params', cmd:'# try %0d%0a and raw CR/LF sequences in any value reflected into a response header'}],
+  manual:['Test any parameter that ends up reflected into a redirect, cache, or custom response header','Test email-sending features for header injection in the "to"/"subject" fields (CC/BCC injection)','Check whether a CDN/cache in front of the app can be tricked into caching the split response (cache-poisoning chain)']
+},
+{ id:'clickjacking', name:'Clickjacking', cat:'Client-Side', sev:'medium',
+  theory:'A page lacks frame-busting protections (X-Frame-Options / CSP frame-ancestors), letting an attacker embed it invisibly in an iframe and trick a victim into clicking through to perform an unintended action.',
+  example:'A "delete account" or "transfer funds" button is overlaid beneath an attacker\u2019s decoy UI inside an invisible iframe, so the victim\u2019s genuine click actually lands on the real button underneath.',
+  tools:[{name:'Burp — Clickjacking PoC generator', cmd:'# right-click the response -> Engagement tools -> Generate clickjacking PoC'}],
+  manual:['Check the X-Frame-Options and Content-Security-Policy frame-ancestors headers on every sensitive page','Build a minimal HTML page that frames the target and test whether it actually loads','Focus on single-click, high-impact actions: account deletion, payment confirmation, permission grants']
+},
+{ id:'protopollution', name:'Client-Side Prototype Pollution', cat:'Client-Side', sev:'medium',
+  theory:'A client-side JS merge/clone/parsing utility lets an attacker pollute Object.prototype via a crafted parameter (often __proto__ or constructor.prototype), which can cascade into DOM XSS or a logic bypass elsewhere in the app\u2019s JS.',
+  example:'A URL parameter parsed by a vulnerable merge utility into the app\u2019s client-side config pollutes the global prototype, flipping a security-relevant flag that a different part of the app later trusts.',
+  tools:[{name:'DOM Invader (Burp extension) — automated prototype-pollution + DOM XSS discovery', cmd:'# enable DOM Invader in Burp\'s embedded browser, then browse the app normally'}],
+  manual:['Try __proto__ and constructor.prototype style parameters anywhere client-side JS parses query strings or JSON into objects','Use the browser console to check whether Object.prototype gained unexpected properties after using a feature','Chain a confirmed pollution into a DOM XSS sink if the polluted property is later used unsafely']
+},
+{ id:'postmessage', name:'Insecure postMessage Handling', cat:'Client-Side', sev:'medium',
+  theory:'A page listens for window.postMessage events without validating the sender\u2019s origin or sanitizing the message content, letting any embedding page send it attacker-controlled data or trigger sensitive actions.',
+  example:'An embedded widget accepts a postMessage payload and writes it straight into the DOM with innerHTML and no origin check, so any page that embeds it can deliver a DOM XSS payload.',
+  tools:[{name:'Burp DOM Invader — flags postMessage listeners and lets you replay messages', cmd:'# DOM Invader -> postMessage panel -> generate event listener proof of concept'}],
+  manual:['Search loaded JS for addEventListener("message", ...) and inspect what the handler does with event.data','Check whether the handler validates event.origin against an allow-list before trusting the payload','Test by hosting a simple page that posts a crafted message to the target iframe/window']
+},
+{ id:'privesc', name:'Privilege Escalation', cat:'Access Control', sev:'critical',
+  theory:'A user reaches functionality or data reserved for a higher-privileged role — vertically (regular user to admin) or horizontally (one user to another at the same level) — usually because a role check exists in the UI but not on the backend endpoint itself.',
+  example:'A regular user account can call an admin-only API route directly because the link is hidden in the UI, but the endpoint never actually checks the caller\u2019s role server-side.',
+  tools:[{name:'Burp Autorize — diff responses across privilege levels automatically', cmd:'# capture as low-priv user, configure Autorize with a higher-priv cookie, replay every request'}],
+  manual:['Enumerate every "admin-only" or "premium-only" route from JS bundles/docs and try it directly with a low-priv session','Try changing a role/plan/tier field in your own profile-update request','Test horizontal escalation by swapping resource IDs between two same-level test accounts']
+},
+{ id:'hostheader', name:'Host Header Injection', cat:'Request Forgery', sev:'high',
+  theory:'The application trusts the client-supplied Host header for things like password-reset links, cache keys, or routing, letting an attacker poison password-reset emails or trigger cache poisoning by sending a forged Host value.',
+  example:'Requesting a password reset while sending a forged Host header causes the reset email to contain a reset link pointing at the attacker\u2019s domain, capturing the victim\u2019s reset token when they click it.',
+  tools:[{name:'Burp Repeater — swap the Host header and resend', cmd:'# change Host: target.com to Host: evil.com (or add X-Forwarded-Host) and observe behavior'}],
+  manual:['Test password-reset, email-verification, and any link-generation feature with a forged Host/X-Forwarded-Host header','Check whether a caching layer keys on Host and can be poisoned to serve attacker content to other users','Test for SSRF-adjacent behavior if Host is used to build an internal callback URL']
+},
+{ id:'reqsmuggling', name:'HTTP Request Smuggling', cat:'Request Forgery', sev:'critical',
+  theory:'A front-end proxy/load balancer and the back-end server disagree on where one HTTP request ends and the next begins — usually a Content-Length vs Transfer-Encoding mismatch — letting an attacker smuggle a hidden request that gets processed as if it came from the next user in line.',
+  example:'A crafted request with conflicting Content-Length and Transfer-Encoding headers causes the back-end to treat part of the smuggled body as the start of the next victim\u2019s request, enabling response-queue poisoning or request hijacking.',
+  tools:[
+    {name:'Burp HTTP Request Smuggler extension', cmd:'# install from the BApp Store, run its automated desync scan against the target'},
+    {name:'Smuggler — standalone desync scanner', cmd:'python3 smuggler.py -u https://target.com'}
+  ],
+  manual:['This requires precise, low-level request crafting — read PortSwigger\u2019s request-smuggling material before attempting it live','Test CL.TE and TE.CL desync variants specifically where a CDN/proxy sits in front of the origin','Confirm impact with a clearly non-destructive timing-based probe before anything else']
+},
+{ id:'cachepoison', name:'Web Cache Poisoning & Cache Deception', cat:'Request Forgery', sev:'high',
+  theory:'An attacker manipulates an unkeyed input (a header, or a parameter the cache ignores) so the cache stores a malicious response and serves it to other users, or tricks the cache into storing a private response under a public-looking URL (cache deception).',
+  example:'A request to a personalized page with a static-looking cache-buster suffix gets cached as if it were a static asset, so the next visitor to that exact URL receives the first victim\u2019s private data.',
+  tools:[{name:'Param Miner (Burp extension) — finds unkeyed inputs that influence the response', cmd:'# install Param Miner, then right-click -> Guess headers/params, and Guess cache keys'}],
+  manual:['Add unusual headers (X-Forwarded-Host, X-Forwarded-Scheme) and check if they change the response without changing the cache key','Try appending static-looking suffixes (.js, .css) to dynamic, personalized URLs to test cache deception','Always confirm a poisoned response by requesting the same URL from a second, unauthenticated session']
+},
+{ id:'jwt', name:'JWT Vulnerabilities', cat:'Identity', sev:'critical',
+  theory:'JSON Web Tokens are only as strong as their signature verification — common breaks include accepting alg: none, RS256/HS256 key-confusion (signing with the public key as an HMAC secret), weak/guessable HMAC secrets, and missing expiry/audience checks.',
+  example:'A token re-signed with alg set to none is accepted because the server\u2019s verification logic trusts the header\u2019s declared algorithm instead of enforcing one server-side.',
+  tools:[
+    {name:'jwt_tool — full automated JWT attack suite', cmd:'python3 jwt_tool.py <token> -M at'},
+    {name:'jwt_tool — RS256-to-HS256 key confusion attack', cmd:'python3 jwt_tool.py <token> -X k -pk public_key.pem'}
+  ],
+  manual:['Decode the token and try alg: none plus algorithm-confusion attacks if the app exposes a public key anywhere','Brute force a suspected weak HMAC secret with a wordlist','Check that expiry (exp), audience (aud), and issuer (iss) claims are all actually enforced server-side']
+},
+{ id:'oauth', name:'OAuth & SSO Misconfiguration', cat:'Identity', sev:'critical',
+  theory:'OAuth/OpenID Connect and SAML SSO flows go wrong in predictable places: a loosely validated redirect_uri, a missing or unchecked state parameter (CSRF in the login flow), or an identity-provider response whose signature isn\u2019t actually verified.',
+  example:'A redirect_uri allow-list that only checks the domain — not the full path — lets an attacker register a callback path containing an open redirect and steal the authorization code or token through it.',
+  tools:[
+    {name:'Burp — intercept and tamper the OAuth/SAML flow manually', cmd:'# capture the authorization request/callback, edit redirect_uri/state, replay'},
+    {name:'SAMLExtractor — pull and inspect SAML assertions', cmd:'python3 samlextractor.py -u https://target.com/sso'}
+  ],
+  manual:['Test how strictly redirect_uri is validated — try subdomains, path traversal, and open-redirect chaining','Check whether the state parameter exists and is actually tied to the session, not just present','For SAML, test whether the assertion\u2019s signature is verified, and whether it can be replayed or have its NameID swapped']
+},
+{ id:'mfa', name:'MFA / OTP Bypass', cat:'Identity', sev:'critical',
+  theory:'Multi-factor flows often have a weaker secondary path than the primary login: missing rate limiting on the OTP field, or a way to skip the MFA step entirely by jumping straight to a post-login endpoint.',
+  example:'After entering a correct password, intercepting the request and replaying the next-step API call directly (skipping OTP entry) still returns a valid session, because the server never re-checks that MFA was actually completed.',
+  tools:[{name:'Burp Intruder — brute force a 4-6 digit OTP field', cmd:'# Intruder with a numeric range payload list against the OTP-verify endpoint'}],
+  manual:['Test whether the OTP endpoint has real rate limiting, not just a UI cooldown','Try calling the "logged in" endpoint directly after password-only auth, skipping the MFA step in the request flow','Check if the OTP can be brute-forced faster via a different (e.g. legacy) endpoint than the one the UI normally uses']
+},
+{ id:'randomtoken', name:'Insecure Randomness & Predictable Tokens', cat:'Identity', sev:'high',
+  theory:'Tokens meant to be unguessable — password-reset tokens, invite codes, API keys, session identifiers — are sometimes generated from a weak or predictable source: sequential, timestamp-based, or a poorly seeded PRNG.',
+  example:'An invite-code generator turns out to be a simple incrementing counter encoded in base62, letting an attacker walk the entire range and use other people\u2019s invites.',
+  tools:[{name:'Burp Sequencer — statistical randomness analysis of a token', cmd:'# capture several tokens, send to Sequencer, run the randomness analysis'}],
+  manual:['Capture a batch of tokens and look for an obvious pattern (sequential, timestamp-derived, short character set)','Test whether a token\u2019s entropy is large enough to resist brute forcing within a realistic time/rate-limit budget','Check password-reset and invite/referral codes specifically — they are common offenders']
+},
+{ id:'pathtraversal', name:'Path Traversal & Local File Inclusion', cat:'Input Handling', sev:'critical',
+  theory:'A filename or path parameter used to read a file on disk isn\u2019t properly constrained, letting an attacker use ../ sequences (or absolute paths) to read files outside the intended directory, and in some stacks escalate to local file inclusion/execution.',
+  example:'A "download invoice" feature taking a filename parameter accepts a relative-path payload like ../../../../etc/passwd and returns the server\u2019s password file instead of the invoice.',
+  tools:[{name:'ffuf — fuzz a parameter with traversal payloads', cmd:'ffuf -u "https://target.com/download?file=FUZZ" -w traversal-payloads.txt -mc 200'}],
+  manual:['Try ../ sequences, URL-encoded variants (%2e%2e%2f), and absolute paths on every file-handling parameter','Try null-byte and double-encoding tricks against older or less common frameworks','If the include is executable (LFI to RCE), check for log-poisoning or upload-then-include chains']
+},
+{ id:'deserialization', name:'Insecure Deserialization', cat:'Input Handling', sev:'critical',
+  theory:'User-controlled data is deserialized by the backend (Java, PHP, Python pickle, .NET) without validation, and a crafted serialized object can trigger unintended code execution or object-injection side effects when reconstructed.',
+  example:'A session or cache value that turns out to be a base64-encoded serialized object can be swapped for a crafted gadget-chain payload that executes code the moment the server deserializes it.',
+  tools:[{name:'ysoserial — generate Java deserialization gadget-chain payloads', cmd:'java -jar ysoserial.jar CommonsCollections5 \'id\' > payload.bin'}],
+  manual:['Look for base64 blobs in cookies/params that decode to binary or recognizable serialized-object markers','Test PHP unserialize() entry points specifically with object-injection payloads if source is available','Treat this as high-risk: confirm with the smallest possible non-destructive payload (a timing delay) before anything else']
+},
+{ id:'cloudstorage', name:'Cloud Storage Misconfiguration', cat:'Configuration', sev:'high',
+  theory:'Cloud storage buckets (S3, GCS, Azure Blob) tied to the application are sometimes left publicly listable or writable, exposing backups, user uploads, or internal assets, or letting an attacker upload content served from a trusted domain.',
+  example:'An S3 bucket referenced by the app\u2019s CDN allows anonymous ListBucket, revealing every object key including ones never meant to be public, like database backups.',
+  tools:[
+    {name:'s3scanner — find and check permissions on public buckets', cmd:'s3scanner scan --bucket target-assets'},
+    {name:'cloud_enum — multi-cloud bucket/storage enumeration', cmd:'python3 cloud_enum.py -k target'}
+  ],
+  manual:['Pull every bucket/storage name referenced in JS bundles, emails, and DNS records, then check its permissions directly','Test for write access, not just read — a writable public bucket is a much higher-impact finding','Check whether bucket contents are served from the main domain in a way that could enable stored XSS']
+},
+{ id:'infodisclosure', name:'Information Disclosure', cat:'Configuration', sev:'medium',
+  theory:'The application leaks more than it should through verbose errors, exposed debug endpoints, comments left in source/JS, or metadata in files (EXIF, document author fields), giving an attacker a head start on everything else.',
+  example:'A stack trace returned on a forced 500 error reveals the exact framework version, internal file paths, and a database connection string that was meant to stay server-side.',
+  tools:[{name:'nuclei — exposure & info-leak templates', cmd:'nuclei -l live.txt -t exposures/ -t exposed-panels/'}],
+  manual:['Force errors deliberately (malformed input, wrong content-type, missing fields) and read what comes back','Check JS source maps (.js.map) for unminified source and revealing comments','Check uploaded documents/images for embedded metadata revealing internal usernames or paths']
+},
+{ id:'graphql', name:'GraphQL-Specific Vulnerabilities', cat:'API', sev:'high',
+  theory:'Beyond BOLA/mass assignment, GraphQL has its own failure modes: introspection left enabled in production, deeply nested or batched queries causing denial of service, and field-level authorization that\u2019s easy to miss because every query/mutation has to be checked individually.',
+  example:'A deeply nested, aliased query asking for the same expensive field hundreds of times in one request overwhelms the resolver layer, since there\u2019s no query-cost limiting.',
+  tools:[
+    {name:'graphql-cop — automated common-misconfig checks', cmd:'graphql-cop -t https://target.com/graphql'},
+    {name:'InQL — Burp extension for GraphQL schema exploration', cmd:'# load InQL in Burp, point it at the /graphql endpoint to auto-generate queries'}
+  ],
+  manual:['Run an introspection query first; if blocked, try field-name brute forcing with a wordlist instead','Test query batching and deep nesting/aliasing for a resource-exhaustion DoS','Check authorization on every individual field and mutation, not just the ones shown in the official client app']
+},
+{ id:'shadowapi', name:'Shadow & Zombie APIs', cat:'API', sev:'high',
+  theory:'Old API versions, internal-only endpoints, or routes from a deprecated mobile build often stay live and reachable long after they\u2019re forgotten about, frequently with weaker security controls than the current version.',
+  example:'A mobile app\u2019s v1 API endpoints were replaced by v3 in the current build, but v1 is still live and unauthenticated for some routes, since it was never decommissioned.',
+  tools:[
+    {name:'kiterunner — brute force API routes from common API specs', cmd:'kr scan https://target.com -w routes-large.kite'},
+    {name:'httpx — probe a wordlist of versioned API paths', cmd:'httpx -l api_version_paths.txt -mc 200,401,403'}
+  ],
+  manual:['Decompile old versions of the mobile app (if available) to recover endpoints no longer used by the current build','Check the Wayback Machine and historical JS bundles for API paths that disappeared from the current site','Try every discovered version prefix (v1, v2, beta, internal) against every known endpoint']
+},
+{ id:'ratelimit', name:'Rate Limiting & Resource Exhaustion', cat:'API', sev:'medium',
+  theory:'Missing or weak rate limiting on expensive or sensitive operations enables brute forcing (logins, OTPs, coupon codes), account enumeration, or a low-effort denial of service from simply calling an expensive endpoint repeatedly.',
+  example:'A "check if email exists" endpoint with no rate limit lets an attacker enumerate every registered user by sending one request per candidate email and watching the response difference.',
+  tools:[{name:'ffuf — high-throughput requests to probe limiting behavior', cmd:'ffuf -u https://target.com/api/check?email=FUZZ -w emails.txt -t 100 -mc 200,404'}],
+  manual:['Test login, OTP, password-reset, and "check availability" endpoints specifically for missing throttling','Check whether rate limiting is applied per-IP only and can be bypassed by rotating X-Forwarded-For','Look for one expensive operation (large export, complex search) that could be abused for resource-exhaustion DoS']
+},
+{ id:'websocket', name:'WebSocket Security', cat:'API', sev:'medium',
+  theory:'WebSocket connections are easy to forget in an access-control review — the handshake often skips the same-origin checks a normal HTTP request would get, and messages on the socket may not be re-authorized per action the way REST endpoints are.',
+  example:'A WebSocket handshake accepts connections from any Origin header, letting an attacker\u2019s page open a socket to the target on the victim\u2019s behalf and ride their authenticated session — a WebSocket analogue of CSRF.',
+  tools:[{name:'Burp Suite — intercept and replay WebSocket messages', cmd:'# Burp\u2019s WebSockets history tab captures and lets you resend individual frames'}],
+  manual:['Check whether the WebSocket handshake validates Origin the same way a CSRF-sensitive form would','Test whether every action sent over the socket re-checks authorization, or only the initial handshake does','Try replaying or tampering with individual frames for IDOR-style object access over the socket']
+},
+{ id:'mobile', name:'Mobile App Specific Issues', cat:'Mobile', sev:'high',
+  theory:'Mobile apps add a parallel attack surface beyond the backend API — secrets hardcoded in the binary, sensitive data written to local storage without encryption, exported components/deep links other apps can trigger, and certificate pinning that can often be bypassed for testing.',
+  example:'An Android app stores the user\u2019s auth token in plaintext in SharedPreferences, recoverable from any rooted device or a simple backup extraction, with no need to touch the backend at all.',
+  tools:[
+    {name:'MobSF — automated static + dynamic mobile app analysis', cmd:'# upload the APK/IPA to a local MobSF instance for an automated report'},
+    {name:'apktool / jadx — decompile and read Android app source', cmd:'jadx -d out/ app.apk'},
+    {name:'Frida + objection — runtime instrumentation and pinning bypass', cmd:'objection -g com.target.app explore'}
+  ],
+  manual:['Pull the APK/IPA and grep decompiled source/strings for hardcoded API keys, URLs, and credentials','Check local storage (SharedPreferences, Keychain, SQLite databases) for sensitive data stored unencrypted','Test exported activities/intents (Android) or custom URL schemes (iOS) for unauthenticated access to sensitive functionality']
 }
 ];
 
@@ -841,9 +1007,59 @@ generic: { label:'Generic / Any Other Site', icon:'target',
       {t:'Map the full intended workflow and try skipping steps, replaying steps, or firing them concurrently'}
     ]}
   ]
+},
+mobileapp: { label:'Mobile App / Backend', icon:'phone',
+  blurb:'The backend API gets the same scrutiny as any web app — but the client binary itself, local storage, and deep links add a whole extra layer worth checking first.',
+  sections:[
+    { title:'Client Binary & Local Storage', items:[
+      {t:'Pull the APK/IPA and grep decompiled source for hardcoded API keys, secrets, and internal URLs', tool:'jadx -d out/ app.apk'},
+      {t:'Check local storage (SharedPreferences/Keychain/SQLite) for sensitive data stored unencrypted'},
+      {t:'Check whether certificate pinning can be bypassed for testing', tool:'objection -g com.target.app explore'},
+      {t:'Test exported Android activities/intents or iOS custom URL schemes for unauthenticated access to sensitive functionality'}
+    ]},
+    { title:'Backend API Behind the App', items:[
+      {t:'Proxy all app traffic through Burp/mitmproxy and treat every endpoint like a web API', tool:'mitmproxy -p 8080'},
+      {t:'Check for older API versions that only a previous app build still calls', tool:'httpx -l api_version_paths.txt -mc 200,401,403'},
+      {t:'Test IDOR/BOLA on every object reference the app sends — user IDs, order IDs, chat/session IDs'},
+      {t:'Check whether the mobile API enforces the same auth and rate limiting as the web app, or less'}
+    ]},
+    { title:'Authentication & Session', items:[
+      {t:'Test biometric/PIN unlock flows for a way to skip straight to an authenticated state'},
+      {t:'Check refresh-token handling: rotation, revocation on logout, and expiry'},
+      {t:'Test deep-link based login or password-reset flows for token leakage via app-to-app handoff'}
+    ]},
+    { title:'Push & Background Features', items:[
+      {t:'Check push-notification payload handling for injection or unauthenticated triggering'},
+      {t:'Check background-sync and webhook features for the same SSRF/IDOR checks used on the web app'}
+    ]}
+  ]
+},
+web3: { label:'Web3 / Crypto / DeFi', icon:'chain',
+  blurb:'Most programs split smart-contract bugs from web bugs — confirm scope first, then focus on the frontend, wallet integration, and off-chain infrastructure around the contract.',
+  sections:[
+    { title:'Scope & Contract Surface', items:[
+      {t:'Confirm whether the bounty program\u2019s scope covers the smart contract, the dApp frontend, or both separately'},
+      {t:'Check whether the dApp validates contract addresses against a known-good list before interacting with them'},
+      {t:'Check that the frontend shows the real recipient/amount before a wallet-connect signature is requested'}
+    ]},
+    { title:'Frontend & Wallet Integration', items:[
+      {t:'Test wallet-connect (WalletConnect/MetaMask) message signing for ambiguous or misleading prompts usable for phishing'},
+      {t:'Check for XSS in any feature that renders on-chain data — token names, NFT metadata, ENS names — without sanitization', tool:'dalfox url "URL"'},
+      {t:'Test transaction-amount and address fields for the same client-side tampering checks used in e-commerce pricing'}
+    ]},
+    { title:'API & Off-Chain Infrastructure', items:[
+      {t:'Test the off-chain API/indexer (balances, transaction history) for IDOR on wallet address or account ID'},
+      {t:'Check webhook/oracle endpoints for SSRF and signature-verification gaps', tool:'interactsh-client'},
+      {t:'Check rate limiting on faucet/airdrop-claim endpoints to prevent automated draining'}
+    ]},
+    { title:'Key & Custody Handling', items:[
+      {t:'Check whether any private key, seed phrase, or session key is ever sent to or stored on a server'},
+      {t:'Test recovery/social-login flows for a way to bypass the wallet entirely and seize custody'}
+    ]}
+  ]
 }
 };
-const PROFILE_ORDER = ['ecommerce','govedu','ai','saas','fintech','generic'];
+const PROFILE_ORDER = ['ecommerce','govedu','ai','saas','fintech','mobileapp','web3','generic'];
 
 /* ============================================================
    DATA: TOOL ARSENAL
@@ -854,7 +1070,15 @@ const TOOL_ARSENAL = [
   {n:'amass', d:'Deep OSINT-based asset/subdomain discovery and network mapping.', c:'amass enum -passive -d target.com -o amass.txt'},
   {n:'assetfinder', d:'Quick lookup of domains and subdomains related to a target.', c:'assetfinder --subs-only target.com'},
   {n:'theHarvester', d:'Gathers emails, names, subdomains, and hosts from public sources.', c:'theHarvester -d target.com -b all'},
-  {n:'gau / waybackurls', d:'Pulls historical URLs from the Wayback Machine, AlienVault OTX, and Common Crawl.', c:'gau --subs target.com'}
+  {n:'gau / waybackurls', d:'Pulls historical URLs from the Wayback Machine, AlienVault OTX, and Common Crawl.', c:'gau --subs target.com'},
+  {n:'dnsx', d:'Fast, multi-purpose DNS resolution and record-type toolkit for large subdomain lists.', c:'dnsx -l subs.txt -resp -a -aaaa -cname'},
+  {n:'massdns', d:'Very high-performance DNS resolver for bulk-resolving huge subdomain wordlists.', c:'massdns -r resolvers.txt -t A -o S subs.txt -w resolved.txt'},
+  {n:'chaos', d:'ProjectDiscovery\u2019s dataset of pre-enumerated subdomains for thousands of public programs.', c:'chaos -d target.com -key $CHAOS_KEY'},
+  {n:'findomain', d:'Cross-platform fast subdomain enumeration with multiple API sources built in.', c:'findomain -t target.com -u subs.txt'},
+  {n:'github-subdomains', d:'Finds subdomains leaked inside public GitHub code and commits.', c:'github-subdomains -d target.com -t $GH_TOKEN'},
+  {n:'dnsrecon / fierce', d:'Classic DNS enumeration and zone-walk tools, useful for older or internal-style DNS setups.', c:'dnsrecon -d target.com -t std'},
+  {n:'Shodan CLI', d:'Search exposed services/banners tied to the target\u2019s ASN, org name, or SSL cert.', c:'shodan search "ssl:target.com"'},
+  {n:'Censys CLI', d:'Alternative internet-wide scan dataset, good for cross-checking Shodan results.', c:'censys search "services.tls.certificates.leaf_data.subject.organization: target"'}
 ]},
 { cat:'Scanning & Fuzzing', tools:[
   {n:'httpx', d:'Probes hosts for liveness, status code, title, and tech stack at scale.', c:'httpx -l subs.txt -title -status-code -tech-detect'},
@@ -862,29 +1086,94 @@ const TOOL_ARSENAL = [
   {n:'nmap', d:'Detailed port/service/version scanning and scriptable checks.', c:'nmap -sC -sV -p- -T4 target.com'},
   {n:'ffuf', d:'Fast HTTP fuzzer for directories, parameters, and virtual hosts.', c:'ffuf -u https://target.com/FUZZ -w wordlist.txt -mc 200,301,302,403'},
   {n:'nuclei', d:'Template-driven vulnerability scanner with a huge community template set.', c:'nuclei -l live.txt -t ~/nuclei-templates/ -severity medium,high,critical'},
-  {n:'katana', d:'JavaScript-aware crawler for building a full URL/endpoint map.', c:'katana -u https://target.com -d 3 -jc'}
+  {n:'katana', d:'JavaScript-aware crawler for building a full URL/endpoint map.', c:'katana -u https://target.com -d 3 -jc'},
+  {n:'gospider', d:'Fast concurrent web crawler with sitemap/robots/JS-link awareness.', c:'gospider -s https://target.com -d 2 -c 10'},
+  {n:'hakrawler', d:'Lightweight crawler good for quickly pulling endpoints at scale across many hosts.', c:'echo https://target.com | hakrawler'},
+  {n:'feroxbuster', d:'Recursive content discovery written in Rust, fast on large wordlists.', c:'feroxbuster -u https://target.com -w wordlist.txt -x php,html,js'},
+  {n:'wfuzz', d:'Flexible HTTP fuzzer, handy for multi-parameter and cookie/header fuzzing.', c:'wfuzz -c -z file,wordlist.txt --hc 404 https://target.com/FUZZ'},
+  {n:'httprobe', d:'Quick liveness probe across a large host list before deeper scanning.', c:'cat subs.txt | httprobe'},
+  {n:'masscan', d:'Extremely fast, internet-scale port scanner for very large host/IP ranges.', c:'masscan -p1-65535 target_ip --rate 1000'}
 ]},
 { cat:'Proxy & Manual Testing', tools:[
   {n:'Burp Suite', d:'The core intercepting proxy for inspecting, repeating, and fuzzing every request.', c:'# configure browser proxy to 127.0.0.1:8080, install CA cert'},
   {n:'OWASP ZAP', d:'Free, open-source alternative to Burp with a similar proxy/scanner workflow.', c:'zap.sh -daemon -port 8090'},
-  {n:'Postman', d:'Convenient for building and replaying complex multi-step API requests.', c:'# GUI tool — import a captured request as a cURL command'}
+  {n:'Postman', d:'Convenient for building and replaying complex multi-step API requests.', c:'# GUI tool — import a captured request as a cURL command'},
+  {n:'mitmproxy', d:'Scriptable terminal-based intercepting proxy, useful for mobile traffic and automation.', c:'mitmproxy -p 8080'},
+  {n:'Caido', d:'Modern Rust-based web proxy/scanner, a lighter alternative to Burp for many workflows.', c:'# desktop app — set browser proxy to Caido\u2019s listening port'}
 ]},
-{ cat:'Vulnerability-Specific', tools:[
+{ cat:'Injection Exploitation', tools:[
   {n:'sqlmap', d:'Automated SQL injection detection and database extraction.', c:'sqlmap -u "https://target.com/item?id=1" --batch --dbs'},
-  {n:'dalfox', d:'Fast, parameter-aware XSS scanning.', c:'dalfox url "https://target.com/search?q=FUZZ"'},
+  {n:'NoSQLMap', d:'Automated NoSQL (MongoDB-style) injection testing and exploitation.', c:'python3 nosqlmap.py'},
+  {n:'commix', d:'Automated OS command injection detection and exploitation.', c:'commix --url="https://target.com/ping?host=8.8.8.8"'},
+  {n:'tplmap', d:'Automated server-side template injection (SSTI) detection and exploitation.', c:'python3 tplmap.py -u "https://target.com/page?name=test"'},
+  {n:'ysoserial', d:'Generates Java deserialization gadget-chain payloads for insecure deserialization.', c:'java -jar ysoserial.jar CommonsCollections5 \'id\' > payload.bin'},
+  {n:'XXEinjector', d:'Automated XXE detection and exploitation, including blind/out-of-band variants.', c:'ruby XXEinjector.rb --host=target.com --path=/api/xml --file=request.txt'}
+]},
+{ cat:'XSS & Client-Side', tools:[
+  {n:'dalfox', d:'Fast, parameter-aware XSS scanning with built-in payload mutation.', c:'dalfox url "https://target.com/search?q=FUZZ"'},
+  {n:'XSStrike', d:'Context-aware XSS payload generation and detection engine.', c:'python3 xsstrike.py -u "https://target.com/search?q=test"'},
+  {n:'DOM Invader', d:'Burp\u2019s built-in browser tool for DOM XSS, prototype pollution, and postMessage testing.', c:'# enable in Burp\u2019s embedded Chromium browser, then browse the app normally'}
+]},
+{ cat:'Auth, API & GraphQL', tools:[
   {n:'jwt_tool', d:'Comprehensive JWT testing: algorithm confusion, weak secrets, claim tampering.', c:'python3 jwt_tool.py <token> -M at'},
+  {n:'hydra', d:'Fast network login brute-forcer for web forms and many other protocols.', c:'hydra -l admin -P passlist.txt target.com http-post-form "/login:user=^USER^&pass=^PASS^:F=incorrect"'},
+  {n:'graphql-cop', d:'Checks common GraphQL security misconfigurations in one pass.', c:'graphql-cop -t https://target.com/graphql'},
+  {n:'InQL', d:'Burp extension that explores a GraphQL schema and auto-builds queries/mutations.', c:'# load InQL in Burp, point it at the /graphql endpoint'},
+  {n:'clairvoyance', d:'Recovers a GraphQL schema by brute force when introspection is disabled.', c:'clairvoyance -o schema.json https://target.com/graphql'},
+  {n:'kiterunner', d:'Brute forces likely API routes using patterns learned from real API specs.', c:'kr scan https://target.com -w routes-large.kite'}
+]},
+{ cat:'SSRF, CORS & Request-Layer', tools:[
+  {n:'interactsh-client', d:'Generates a unique out-of-band domain to confirm blind SSRF/XXE/RCE callbacks.', c:'interactsh-client'},
+  {n:'ssrfmap', d:'Automates turning a confirmed SSRF into file reads or further pivoting.', c:'python3 ssrfmap.py -r request.txt -p url -m readfiles'},
   {n:'corsy', d:'Automated CORS misconfiguration scanner.', c:'python3 corsy.py -u https://target.com'},
+  {n:'Smuggler', d:'Standalone scanner for HTTP request smuggling / desync issues.', c:'python3 smuggler.py -u https://target.com'},
+  {n:'Param Miner', d:'Burp extension that finds unkeyed inputs for cache poisoning and hidden parameters.', c:'# Burp -> right-click -> Guess headers/params, then Guess cache keys'}
+]},
+{ cat:'Subdomain Takeover & Cloud Recon', tools:[
   {n:'subzy / subjack', d:'Subdomain takeover detection against known dangling-service fingerprints.', c:'subzy run --targets subs.txt'},
-  {n:'graphql-cop', d:'Checks common GraphQL security misconfigurations.', c:'graphql-cop -t https://target.com/graphql'}
+  {n:'s3scanner', d:'Finds and checks permissions on public cloud storage buckets.', c:'s3scanner scan --bucket target-assets'},
+  {n:'cloud_enum', d:'Multi-cloud (AWS/Azure/GCP) storage and resource enumeration.', c:'python3 cloud_enum.py -k target'}
 ]},
 { cat:'Secrets & Source Exposure', tools:[
   {n:'gitleaks', d:'Scans source/history for hardcoded secrets and credentials.', c:'gitleaks detect --source . -v'},
   {n:'trufflehog', d:'Deep secret-scanning across filesystems, git history, and more.', c:'trufflehog filesystem ./repo'},
   {n:'GitTools', d:'Reconstructs source code from an exposed .git directory.', c:'./gitdumper.sh https://target.com/.git/ ./dumped'}
 ]},
-{ cat:'Reporting', tools:[
+{ cat:'Mobile Application Testing', tools:[
+  {n:'MobSF', d:'Automated static + dynamic analysis for Android/iOS apps via a local web UI.', c:'docker run -p 8000:8000 opensecurity/mobile-security-framework-mobsf'},
+  {n:'apktool', d:'Decodes Android APK resources and smali code for manual review.', c:'apktool d app.apk -o out/'},
+  {n:'jadx', d:'Decompiles Android APKs to readable Java source.', c:'jadx -d out/ app.apk'},
+  {n:'Frida', d:'Runtime instrumentation toolkit for hooking and modifying app behavior live.', c:'frida -U -f com.target.app -l hook.js --no-pause'},
+  {n:'objection', d:'Frida-powered runtime exploration, including certificate-pinning bypass.', c:'objection -g com.target.app explore'},
+  {n:'Burp + mobile proxy config', d:'Routes a phone\u2019s traffic through Burp for the exact same testing workflow as web.', c:'# install Burp\u2019s CA cert on the device, set Wi-Fi proxy to your machine\u2019s IP:8080'}
+]},
+{ cat:'Network & Infrastructure', tools:[
+  {n:'nmap', d:'Detailed port/service/version scanning and scriptable checks.', c:'nmap -sC -sV -p- -T4 target.com'},
+  {n:'naabu', d:'Very fast port scanner suited for large host lists.', c:'naabu -l live.txt -top-ports 1000'},
+  {n:'testssl.sh', d:'Thorough TLS/SSL configuration and cipher-suite audit.', c:'./testssl.sh https://target.com'},
+  {n:'sslyze', d:'Fast, scriptable TLS scanner — a good complement to testssl.sh.', c:'sslyze target.com'}
+]},
+{ cat:'Cloud & Container Security', tools:[
+  {n:'Prowler', d:'Broad AWS (and multi-cloud) security best-practice and misconfiguration auditor.', c:'prowler aws'},
+  {n:'ScoutSuite', d:'Multi-cloud security posture auditor (AWS, Azure, GCP) with an HTML report.', c:'scout aws'},
+  {n:'Trivy', d:'Scans container images and IaC files for known vulnerabilities and misconfigurations.', c:'trivy image target/app:latest'}
+]},
+{ cat:'Browser Extensions & QoL', tools:[
+  {n:'Wappalyzer', d:'One-click technology fingerprinting for any page you visit.', c:'# browser extension, no CLI'},
+  {n:'FoxyProxy', d:'Quick proxy on/off toggle and per-domain proxy rules.', c:'# browser extension, no CLI'},
+  {n:'Cookie-Editor', d:'Fast inspection and editing of cookies for session-handling tests.', c:'# browser extension, no CLI'},
+  {n:'HackBar', d:'Quick-access panel for encoding, hashing, and common payload snippets.', c:'# browser extension, no CLI'}
+]},
+{ cat:'Wordlists & Payload References', tools:[
+  {n:'SecLists', d:'The standard wordlist collection for fuzzing, directories, and payloads.', c:'git clone https://github.com/danielmiessler/SecLists.git'},
+  {n:'PayloadsAllTheThings', d:'Categorized payload examples for almost every vulnerability class in this library.', c:'git clone https://github.com/swisskyrepo/PayloadsAllTheThings.git'},
+  {n:'FuzzDB', d:'Attack-pattern and discovery wordlists, including platform-specific paths.', c:'git clone https://github.com/fuzzdb-project/fuzzdb.git'}
+]},
+{ cat:'Reporting & Documentation', tools:[
   {n:'CVSS Calculator', d:'Official FIRST.org calculator to score severity and generate a vector string.', c:'# https://www.first.org/cvss/calculator/3.1'},
-  {n:'asciinema', d:'Lightweight terminal recording for clean PoC evidence.', c:'asciinema rec poc.cast'}
+  {n:'asciinema', d:'Lightweight terminal recording for clean PoC evidence.', c:'asciinema rec poc.cast'},
+  {n:'Obsidian / Notion', d:'Free-form note-taking to keep a running, searchable record across an engagement.', c:'# desktop/web app, no CLI'},
+  {n:'Dradis', d:'Collaborative reporting platform that imports tool output and builds a report.', c:'# self-hosted web app — import nmap/Burp XML output directly'}
 ]}
 ];
 
@@ -901,6 +1190,26 @@ const RESOURCES = [
 { n:'SecLists', d:'The standard wordlist collection for fuzzing, directory discovery, and payload testing.', u:'https://github.com/danielmiessler/SecLists' },
 { n:'ProjectDiscovery docs', d:'Official documentation for subfinder, httpx, nuclei, naabu and the rest of that toolchain.', u:'https://docs.projectdiscovery.io' },
 { n:'FIRST.org CVSS Calculator', d:'Score severity consistently and generate the vector string for your reports.', u:'https://www.first.org/cvss/calculator/3.1' }
+];
+
+/* ============================================================
+   DATA: LIVE INTEL — checked against GitHub's public API at runtime
+   ============================================================ */
+const LIVE_REPOS = [
+  {owner:'projectdiscovery', repo:'nuclei', label:'nuclei'},
+  {owner:'projectdiscovery', repo:'nuclei-templates', label:'nuclei-templates'},
+  {owner:'projectdiscovery', repo:'subfinder', label:'subfinder'},
+  {owner:'projectdiscovery', repo:'httpx', label:'httpx'},
+  {owner:'projectdiscovery', repo:'naabu', label:'naabu'},
+  {owner:'projectdiscovery', repo:'katana', label:'katana'},
+  {owner:'ffuf', repo:'ffuf', label:'ffuf'},
+  {owner:'owasp-amass', repo:'amass', label:'amass'},
+  {owner:'sqlmapproject', repo:'sqlmap', label:'sqlmap'},
+  {owner:'hahwul', repo:'dalfox', label:'dalfox'},
+  {owner:'OJ', repo:'gobuster', label:'gobuster'},
+  {owner:'ticarpi', repo:'jwt_tool', label:'jwt_tool'},
+  {owner:'danielmiessler', repo:'SecLists', label:'SecLists'},
+  {owner:'swisskyrepo', repo:'PayloadsAllTheThings', label:'PayloadsAllTheThings'}
 ];
 
 /* ============================================================
@@ -922,6 +1231,7 @@ const NAV_ITEMS = [
   {id:'vulns', label:'Vulnerability Library', icon:'bug'},
   {id:'targets', label:'Target Profiles', icon:'target'},
   {id:'tools', label:'Tool Arsenal', icon:'terminal'},
+  {id:'live', label:'Live Intel', icon:'clock'},
   {id:'resources', label:'Resources', icon:'book'}
 ];
 
@@ -1005,6 +1315,7 @@ function renderDashboard(el){
       ${navCard('vulns','bug','Vulnerability Library','Theory, a worked example, tools and manual tests for every major bug class.')}
       ${navCard('targets','target','Target Profiles','Add a real target, pick its category, and get a tailored checklist with commands.')}
       ${navCard('tools','terminal','Tool Arsenal','Every tool mentioned across BHOS, grouped by purpose, with a ready-to-run command.')}
+      ${navCard('live','clock','Live Intel','Real, live version data for the core tools, pulled straight from GitHub.')}
       ${navCard('resources','book','Resources','Labs, write-ups, and references to keep leveling up.')}
     </div>
   `;
@@ -1066,29 +1377,47 @@ function renderVulnCard(v){
     </div>
   </details>`;
 }
+const VULN_CAT_ORDER = ['Injection','Client-Side','Access Control','Request Forgery','Identity','Input Handling','Configuration','API','Logic','Mobile'];
 function renderVulns(el, opts){
   opts = opts || {};
   const q = (opts.q !== undefined ? opts.q : STATE.vulnQuery).toLowerCase();
   const sev = opts.sev || STATE.vulnSev;
-  STATE.vulnQuery = q; STATE.vulnSev = sev;
+  const cat = opts.cat || STATE.vulnCat || 'all';
+  STATE.vulnQuery = q; STATE.vulnSev = sev; STATE.vulnCat = cat;
   const sevs = ['all','critical','high','medium','low'];
   const filtered = VULNS.filter(v=>{
     const matchesQ = !q || v.name.toLowerCase().includes(q) || v.cat.toLowerCase().includes(q);
     const matchesSev = sev==='all' || v.sev===sev;
-    return matchesQ && matchesSev;
+    const matchesCat = cat==='all' || v.cat===cat;
+    return matchesQ && matchesSev && matchesCat;
+  });
+  const groups = new Map();
+  VULN_CAT_ORDER.forEach(c=>groups.set(c, []));
+  filtered.forEach(v=>{ if(!groups.has(v.cat)) groups.set(v.cat, []); groups.get(v.cat).push(v); });
+  let listHtml = '';
+  groups.forEach((items, catName)=>{
+    if(!items.length) return;
+    listHtml += `<div class="subhead" style="margin-top:24px;">${escapeHtml(catName)} <span class="badge neutral" style="text-transform:none;">${items.length}</span></div>`;
+    listHtml += items.map(renderVulnCard).join('');
   });
   el.innerHTML = `
     <div class="page-head">
-      <span class="eyebrow">reference</span>
+      <span class="eyebrow">reference · ${VULNS.length} classes</span>
       <h1>Vulnerability Library</h1>
       <p class="lede">Theory, a concrete example, the tools/commands to test for it, and manual techniques — for every major class you'll run into.</p>
     </div>
     <div class="toolbar">
       <div class="search-wrap">${ICON('search',16)}<input type="text" id="vulnSearch" placeholder="Search vulnerability classes…" value="${escapeHtml(q)}"></div>
-      ${sevs.map(s=>`<span class="chip ${sev===s?'active':''}" data-action="vulnSev" data-sev="${s}">${s==='all'?'All':s.charAt(0).toUpperCase()+s.slice(1)}</span>`).join('')}
+      <select id="vulnCatSelect" style="width:auto;min-width:170px;">
+        <option value="all" ${cat==='all'?'selected':''}>All categories</option>
+        ${VULN_CAT_ORDER.map(c=>`<option value="${escapeHtml(c)}" ${cat===c?'selected':''}>${escapeHtml(c)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="toolbar">
+      ${sevs.map(s=>`<span class="chip ${sev===s?'active':''}" data-action="vulnSev" data-sev="${s}">${s==='all'?'All severities':s.charAt(0).toUpperCase()+s.slice(1)}</span>`).join('')}
     </div>
     <div id="vulnList">
-      ${filtered.length ? filtered.map(renderVulnCard).join('') : emptyState('bug','No matches','Try a different search term or severity filter.')}
+      ${filtered.length ? listHtml : emptyState('bug','No matches','Try a different search term, category, or severity filter.')}
     </div>
   `;
   const input = document.getElementById('vulnSearch');
@@ -1210,6 +1539,107 @@ function renderTools(el){
   `;
 }
 
+/* ---------- Live Intel: real data pulled from GitHub's public API ---------- */
+function timeAgo(when){
+  if(!when) return 'unknown date';
+  const d = new Date(when);
+  if(isNaN(d.getTime())) return 'unknown date';
+  const diffMs = Date.now() - d.getTime();
+  const mins = Math.round(diffMs/60000);
+  if(mins < 1) return 'just now';
+  if(mins < 60) return mins+'m ago';
+  const hrs = Math.round(mins/60);
+  if(hrs < 24) return hrs+'h ago';
+  const days = Math.round(hrs/24);
+  if(days < 30) return days+'d ago';
+  const months = Math.round(days/30);
+  if(months < 12) return months+'mo ago';
+  return Math.round(months/12)+'y ago';
+}
+async function fetchRepoInfo(owner, repo){
+  try{
+    const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`, {headers:{'Accept':'application/vnd.github+json'}});
+    if(r.status===200){
+      const data = await r.json();
+      return {ok:true, kind:'release', version: data.tag_name || data.name || 'unknown', date: data.published_at, url: data.html_url};
+    }
+    if(r.status===404){
+      const r2 = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=1`, {headers:{'Accept':'application/vnd.github+json'}});
+      if(r2.ok){
+        const arr = await r2.json();
+        if(arr && arr[0]){
+          const c = arr[0];
+          return {ok:true, kind:'commit', version: (c.sha||'').slice(0,7) || 'unknown', date: c.commit && c.commit.author ? c.commit.author.date : null, url: c.html_url || `https://github.com/${owner}/${repo}`};
+        }
+      }
+      return {ok:false, error:'no releases or commits found'};
+    }
+    if(r.status===403) return {ok:false, error:'rate-limited by GitHub — try again later'};
+    return {ok:false, error:'HTTP '+r.status};
+  }catch(e){
+    return {ok:false, error:'network/CORS error reaching GitHub'};
+  }
+}
+function liveRowSkeleton(r){
+  return `<div class="card"><h3 style="font-family:var(--mono);font-size:14px;margin-bottom:6px;">${escapeHtml(r.label)}</h3><p style="font-size:12.5px;margin:0;color:var(--text-faint);">Checking…</p></div>`;
+}
+function renderLiveResults(results, checkedAt){
+  const grid = document.getElementById('liveGrid');
+  if(grid){
+    grid.innerHTML = results.map(r=>{
+      if(!r.ok){
+        return `<div class="card"><h3 style="font-family:var(--mono);font-size:14px;margin-bottom:6px;">${escapeHtml(r.label)}</h3><p style="font-size:12.5px;margin:0;color:var(--text-faint);">Unavailable right now (${escapeHtml(r.error||'error')}) — <a href="https://github.com/${escapeHtml(r.owner)}/${escapeHtml(r.repo)}" target="_blank" rel="noopener noreferrer">open on GitHub</a></p></div>`;
+      }
+      return `<a class="card clickable" href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer" style="display:block;text-decoration:none;color:inherit;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <h3 style="font-family:var(--mono);font-size:14px;margin:0;">${escapeHtml(r.label)}</h3>
+          <span class="badge ${r.kind==='release'?'low':'neutral'}" style="text-transform:none;">${r.kind==='release'?'release':'commit'}</span>
+        </div>
+        <p style="font-size:13px;margin:8px 0 0;"><code style="background:var(--surface-3);padding:1px 6px;border-radius:4px;color:var(--accent);">${escapeHtml(r.version)}</code> · ${timeAgo(r.date)}</p>
+      </a>`;
+    }).join('');
+  }
+  const lc = document.getElementById('liveLastChecked');
+  if(lc) lc.textContent = 'Checked ' + timeAgo(checkedAt);
+}
+async function refreshLiveData(){
+  const btn = document.getElementById('liveRefreshBtn');
+  if(btn){ btn.disabled = true; btn.innerHTML = ICON('clock',14)+' Checking…'; }
+  const grid = document.getElementById('liveGrid');
+  if(grid) grid.innerHTML = LIVE_REPOS.map(liveRowSkeleton).join('');
+  const results = await Promise.all(LIVE_REPOS.map(r => fetchRepoInfo(r.owner, r.repo).then(res => Object.assign({}, r, res))));
+  const checkedAt = Date.now();
+  STATE.liveCache = {checkedAt, results};
+  await stSet('bhos:live-cache', JSON.stringify(STATE.liveCache));
+  renderLiveResults(results, checkedAt);
+  if(btn){ btn.disabled = false; btn.innerHTML = ICON('clock',14)+' Refresh'; }
+}
+async function renderLive(el){
+  el.innerHTML = `
+    <div class="page-head">
+      <span class="eyebrow">stay current</span>
+      <h1>Live Intel</h1>
+      <p class="lede">Pulls the latest release (or latest commit, if a project doesn\u2019t tag releases) for the core tools used across BHOS, straight from GitHub\u2019s public API — so you know what\u2019s worth updating before a hunt.</p>
+    </div>
+    <div class="callout">
+      ${ICON('alertTriangle',18)}
+      <p><strong class="label">What this is — and isn\u2019t</strong>There\u2019s no single live feed for "every vulnerability and tool in existence" — no such API exists. This panel checks GitHub directly for real version data on the tools below. The methodology, vulnerability library, and checklists are a curated knowledge base; the most reliable way to keep <em>those</em> current is the linked template repos and write-ups on the Resources page.</p>
+    </div>
+    <div class="toolbar">
+      <div class="topbar-spacer"></div>
+      <span id="liveLastChecked" class="type-pill">Loading…</span>
+      <button class="btn primary sm" id="liveRefreshBtn" data-action="liveRefresh" type="button">${ICON('clock',14)} Refresh</button>
+    </div>
+    <div id="liveGrid" class="grid cols-2">${LIVE_REPOS.map(liveRowSkeleton).join('')}</div>
+  `;
+  const cacheRaw = await stGet('bhos:live-cache');
+  let cache = null;
+  try{ cache = cacheRaw ? JSON.parse(cacheRaw) : null; }catch(e){ cache = null; }
+  const stale = !cache || (Date.now() - cache.checkedAt) > 6*60*60*1000;
+  if(cache && cache.results){ renderLiveResults(cache.results, cache.checkedAt); }
+  if(stale){ refreshLiveData(); }
+}
+
 function renderResources(el){
   el.innerHTML = `
    <div class="page-head"><span class="eyebrow">keep leveling up</span><h1>Resources</h1><p class="lede">Labs, references, and disclosed write-ups worth a regular look.</p></div>
@@ -1241,7 +1671,7 @@ function renderSidebarNav(activeRoute){
   document.getElementById('navList').innerHTML = `<div class="nav-section-label">Modules</div>${html}`;
 }
 function updateCrumb(route){
-  const labelMap = {dashboard:'Dashboard', methodology:'Methodology', vulns:'Vulnerability Library', targets:'Target Profiles', tools:'Tool Arsenal', resources:'Resources'};
+  const labelMap = {dashboard:'Dashboard', methodology:'Methodology', vulns:'Vulnerability Library', targets:'Target Profiles', tools:'Tool Arsenal', live:'Live Intel', resources:'Resources'};
   document.getElementById('crumb').innerHTML = `BHOS / <b>${labelMap[route] || 'Dashboard'}</b>`;
 }
 function updateGlobalProgressUI(){
@@ -1265,6 +1695,7 @@ async function renderRoute(){
       else renderTargetsList(content);
       break;
     case 'tools': renderTools(content); break;
+    case 'live': await renderLive(content); break;
     case 'resources': renderResources(content); break;
     default: renderDashboard(content);
   }
@@ -1379,8 +1810,9 @@ function onContentClick(e){
     e.stopPropagation();
     const action = actionEl.getAttribute('data-action');
     if(action==='copy') copyCmd(actionEl, actionEl.getAttribute('data-cmd'));
-    else if(action==='vulnSev') renderVulns(document.getElementById('content'), {sev: actionEl.getAttribute('data-sev'), q: STATE.vulnQuery});
+    else if(action==='vulnSev') renderVulns(document.getElementById('content'), {sev: actionEl.getAttribute('data-sev'), q: STATE.vulnQuery, cat: STATE.vulnCat});
     else if(action==='createTarget') createTarget();
+    else if(action==='liveRefresh') refreshLiveData();
     else if(action==='deleteTarget') confirmDeleteTarget(actionEl.getAttribute('data-id'), actionEl);
     return;
   }
@@ -1398,6 +1830,8 @@ function onContentChange(e){
     updateBadgeCount(t.closest('details.acc'));
     updateGlobalProgressUI();
     updateMethodPageProgressBar();
+  } else if(t.id === 'vulnCatSelect'){
+    renderVulns(document.getElementById('content'), {cat: t.value, sev: STATE.vulnSev, q: STATE.vulnQuery});
   } else if(t.matches && t.matches('input[type=checkbox][data-action="vulnReviewed"]')){
     const id = t.getAttribute('data-id');
     if(t.checked){ if(!STATE.vulnsReviewed.includes(id)) STATE.vulnsReviewed.push(id); }
@@ -1431,7 +1865,7 @@ function onContentChange(e){
 }
 function onContentInput(e){
   if(e.target.id === 'vulnSearch'){
-    renderVulns(document.getElementById('content'), {q: e.target.value, sev: STATE.vulnSev, refocus:true});
+    renderVulns(document.getElementById('content'), {q: e.target.value, sev: STATE.vulnSev, cat: STATE.vulnCat, refocus:true});
   } else if(e.target.id === 'targetName'){
     const btn = document.getElementById('createTargetBtn');
     if(btn) btn.disabled = !(e.target.value.trim() && STATE.pendingType);
